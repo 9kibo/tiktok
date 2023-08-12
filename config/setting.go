@@ -21,6 +21,10 @@ var (
 	CosImageUrl string
 	SecretId    string
 	SecretKey   string
+
+	RedisAddr string
+	RedisPort string
+	RedisPwd  string
 )
 
 func init() {
@@ -31,6 +35,7 @@ func init() {
 	Loadserver(file)
 	LoadDB(file)
 	LoadCos(file)
+	LoadRedis(file)
 }
 
 func Loadserver(file *ini.File) {
@@ -40,7 +45,7 @@ func Loadserver(file *ini.File) {
 	JwtKey = file.Section("server").Key("JwtKey").MustString("tiktok")
 }
 func LoadDB(file *ini.File) {
-	DBHost = file.Section("mysql").Key("DBHost").MustString("43.142.175.143")
+	DBHost = file.Section("mysql").Key("DBHosexitt").MustString("43.142.175.143")
 	DBPort = file.Section("mysql").Key("DBPort").MustString("3306")
 	DBUser = file.Section("mysql").Key("DBUser").MustString("root")
 	DBPwd = file.Section("mysql").Key("DBPwd").MustString("TXY.zh2425904437")
@@ -51,4 +56,9 @@ func LoadCos(file *ini.File) {
 	CosImageUrl = file.Section("cos").Key("CosImageUrl").MustString("")
 	SecretId = file.Section("cos").Key("SecretId").MustString("")
 	SecretKey = file.Section("cos").Key("SecretKey").MustString("")
+}
+func LoadRedis(file *ini.File) {
+	RedisAddr = file.Section("redis").Key("RedisAddr").MustString("")
+	RedisPort = file.Section("redis").Key("RedisPort").MustString("")
+	RedisPwd = file.Section("redis").Key("RedisPwd").MustString("")
 }
