@@ -23,9 +23,9 @@ func NewJWT() *JWT {
 }
 
 type MyClaims struct {
-	Userid             uint `json:"userid"`
-	jwt.StandardClaims      //jwt默认字段
-	// 可不填
+	Userid             uint
+	jwt.StandardClaims //jwt默认字段
+	// 可选填
 	//Issuer    string          签发者
 	//Subject   string			签发对象
 	//Audience  ClaimStrings	签发受众
