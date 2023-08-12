@@ -6,8 +6,8 @@ import (
 
 type Video struct {
 	gorm.Model
-	VideoAuthorId uint   `gorm:"index;not null"`
-	VideoUrl      string `gorm:"" json:"video_url"`
-	VideoCover    string `gorm:"" json:"video_cover"`
-	Tittle        string `gorm:"" json:"tittle"`
+	VideoAuthorId uint   `gorm:"not null;index;"`
+	VideoUrl      string `gorm:"not null;"`
+	VideoCover    string `gorm:"not null;"`
+	Tittle        string `gorm:"not null;type:longtext"`
 }

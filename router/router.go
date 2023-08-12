@@ -18,15 +18,15 @@ func InitRouter() {
 	apiRouter.POST("/user/register/", api.Register)
 	apiRouter.POST("/user/login/", api.Login)
 	//互动
-	apiRouter.POST("/favorite/action/", middleware.JwtToken(), api.Like)
-	apiRouter.GET("/favorite/list/", middleware.JwtToken(), api.LikeList)
+	apiRouter.POST("/favorite/action/", middleware.JwtToken(), api.Favorite)
+	apiRouter.GET("/favorite/list/", middleware.JwtToken(), api.FavoriteList)
 	apiRouter.POST("/comment/action/", middleware.JwtToken(), api.CommAction)
 	apiRouter.GET("/comment/list/", middleware.JwtToken(), api.CommList)
 	//社交
 	apiRouter.POST("/relation/action/", middleware.JwtToken(), api.RelationAction)
-	apiRouter.GET("/relation/follow/list/", middleware.JwtToken(), api.GetFollowing)
-	apiRouter.GET("/relation/follower/list", middleware.JwtToken(), api.GetFollowers)
-	apiRouter.GET("/relation/friend/list", middleware.JwtToken(), api.GetFileList)
+	apiRouter.GET("/relation/follow/list/", middleware.JwtToken(), api.GetFollowingList)
+	apiRouter.GET("/relation/follower/list", middleware.JwtToken(), api.GetFollowersList)
+	apiRouter.GET("/relation/friend/list", middleware.JwtToken(), api.GetFriendList)
 
-	_ = r.Run(config.DBPort)
+	_ = r.Run(config.Port)
 }

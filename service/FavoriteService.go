@@ -1,6 +1,6 @@
-package server
+package service
 
-type FavoriteServer interface {
+type FavoriteService interface {
 	//IsFavorite 根据id返回是否点赞了该视频
 	IsFavorite(videoId int64, userId int64) (bool, error)
 	//FavouriteCount 根据当前视频id获取当前视频点赞数量。

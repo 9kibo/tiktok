@@ -2,7 +2,16 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"tiktok/service"
 )
 
-func Like(c *gin.Context)     {}
-func LikeList(c *gin.Context) {}
+type FavoriteActionResp struct {
+	StatusRespond
+}
+type FavoriteListResp struct {
+	StatusRespond
+	VideoList []service.VideoRespond `json:"video_list"`
+}
+
+func Favorite(c *gin.Context)     {}
+func FavoriteList(c *gin.Context) {}

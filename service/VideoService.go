@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"mime/multipart"
@@ -16,7 +16,7 @@ type VideoRespond struct {
 	Title         string      `json:"title"`
 }
 
-type VideoServer interface {
+type VideoService interface {
 	//Feed 传入时间戳,当前用户Id，返回视频切片 和 返回的视频切片中的最早时间
 	Feed(lastTime time.Time, userId int64) ([]VideoRespond, time.Time, error)
 	//GetVideoById 根据视频id和用户id获取video
