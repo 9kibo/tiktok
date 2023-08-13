@@ -24,6 +24,8 @@ var (
 
 	RedisAddr string
 	RedisPwd  string
+
+	KafkaAddr string
 )
 
 func init() {
@@ -59,4 +61,7 @@ func LoadCos(file *ini.File) {
 func LoadRedis(file *ini.File) {
 	RedisAddr = file.Section("redis").Key("RedisAddr").MustString("")
 	RedisPwd = file.Section("redis").Key("RedisPwd").MustString("")
+}
+func LoadKafka(file *ini.File) {
+	KafkaAddr = file.Section("kafka").Key("KafkaAddr").MustString("")
 }
