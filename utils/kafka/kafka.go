@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"github.com/segmentio/kafka-go"
 	"reflect"
 	"tiktok/config"
@@ -38,11 +39,23 @@ func GetKafka(Topic string, Group string) *TKafka {
 	}
 }
 
-func (T *TKafka) WriteMsg(key string, value string) {
-	T.Writer.WriteMessages(T.Ctx, kafka.Message{
-		Key:   String2Bytes(key),
-		Value: String2Bytes(value),
-	})
+func (T *TKafka) WriteMsg(key string, value string, back func(string, string)) {
+	for i := 0; i < 3; i++ {
+		if err := T.Writer.WriteMessages(T.Ctx, kafka.Message{
+			Key:   String2Bytes(key),
+			Value: String2Bytes(value),
+		}); err != nil {
+			if err == kafka.LeaderNotAvailable {
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				back(key, value)
+				fmt.Printf("kafka写失败Topic:%s,key:%s,value:%s", T.Topic, key, value)
+			}
+		} else {
+			break
+		}
+	}
 }
 func (T *TKafka) ReadMsg() (kafka.Message, error) {
 	Msg, err := T.Reader.ReadMessage(T.Ctx)
