@@ -1,0 +1,64 @@
+basePath: /
+definitions:
+  model.BaseResp:
+    properties:
+      status_code:
+        description: 业务响应码
+        example: 1
+        type: integer
+      status_msg:
+        description: 业务消息
+        example: xxxx
+        type: string
+    type: object
+host: videotools.cn
+info:
+  contact:
+    email: 584807419@qq.com
+    name: 联系人
+    url: http://www.swagger.io/support
+  description: 字节青训营-模仿抖音项目
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: mock tiktok
+  version: 1.0 版本
+paths:
+  /re:
+    get:
+      consumes:
+      - application/json
+      description: 关注或者取消关注用户
+      parameters:
+      - description: 关注者
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      - description: 被关注者
+        in: query
+        name: to_user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.BaseResp'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.BaseResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.BaseResp'
+      summary: 用户关系操作
+      tags:
+      - Relation
+swagger: "2.0"
