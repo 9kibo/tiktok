@@ -6,10 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 	"gorm.io/gorm/logger"
-	"log"
 	"os"
-	"path/filepath"
-	"strings"
 	"tiktok/pkg/constant"
 )
 
@@ -20,12 +17,12 @@ var (
 func Init(path string) {
 	var err error
 	profile := os.Getenv(constant.ProfileEnv)
-	if profile != "" {
-		log.Println("profile = ", profile)
-		filename := filepath.Base(path)
-		split := strings.Split(filename, ".")
-		path = filepath.Join(filepath.Dir(path), split[0]+"-"+profile+"."+split[1])
-	}
+	//if profile != "" {
+	//	log.Println("profile = ", profile)
+	//	filename := filepath.Base(path)
+	//	split := strings.Split(filename, ".")
+	//	path = filepath.Join(filepath.Dir(path), split[0]+"-"+profile+"."+split[1])
+	//}
 
 	C = &Configuration{}
 	if err = ini.MapTo(C, path); err != nil {

@@ -25,6 +25,5 @@ func GetRedis(db int) (*redis.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return rdb, nil
 }

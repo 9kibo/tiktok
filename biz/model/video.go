@@ -23,4 +23,10 @@ type VideoFavor struct {
 	CreatedAt int64
 	UserId    int64
 	VideoId   int64
+	VideoInfo Video `gorm:"foreignkey:Id"` //一对一
+}
+type FavoriteReq struct {
+	UserId     int64 `from:"user_id" binding:"ne=0"`
+	VideoId    int64 `from:"video_id" binding:"ne=0"`
+	ActionType int32 `from:"action_type" binding:"gte=1,lte=2"`
 }
