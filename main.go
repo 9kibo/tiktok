@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"tiktok/biz/config"
 	"tiktok/biz/dao"
+	"tiktok/biz/middleware/kafka"
 	"tiktok/biz/middleware/logmw"
 	"tiktok/biz/middleware/mswagger"
 )
@@ -12,6 +13,7 @@ func Init() {
 	config.Init("config.ini")
 	gormLogLevel, gormLogWriter := logmw.InitLog()
 	dao.Init(gormLogLevel, gormLogWriter)
+	kafka.Init()
 }
 
 // @title mock tiktok
