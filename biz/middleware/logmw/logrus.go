@@ -142,7 +142,7 @@ var (
 )
 
 // 必须禁止颜色
-func (w RedirectLog) gormLog(format string, args ...interface{}) {
+func (w RedirectLog) gormLog(format string, args []interface{}) {
 	var level logrus.Level
 	if strings.HasPrefix(format, gormInfoStr) {
 		level = logrus.InfoLevel
