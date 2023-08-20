@@ -7,6 +7,7 @@ type Video struct {
 	DeletedAt int64 `json:"-" `
 
 	AuthorId int64  `json:"-" `
+	Author   *User  `json:"author" gorm:"-"`
 	Title    string `json:"title,omitempty"`
 	PlayUrl  string `json:"play_url,omitempty"`
 	CoverUrl string `json:"cover_url,omitempty" `
@@ -15,8 +16,7 @@ type Video struct {
 	CommentCount  int32 `json:"comment_count" gorm:"-"`
 
 	//非表
-	IsFavorite bool  `json:"is_favorite" gorm:"-"`
-	Author     *User `json:"author" gorm:"-"`
+	IsFavorite bool `json:"is_favorite" gorm:"-"`
 }
 type VideoFavor struct {
 	Id        int64

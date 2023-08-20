@@ -12,7 +12,7 @@ type FavoriteActionResp struct {
 }
 type FavoriteListResp struct {
 	model.BaseResp
-	//VideoList []service.VideoRespond `json:"video_list"`
+	VideoList []model.Video `json:"video_list"`
 }
 
 func Favorite(c *gin.Context) {
@@ -24,6 +24,11 @@ func Favorite(c *gin.Context) {
 	if err := F.FavouriteAction(req.UserId, req.VideoId, req.ActionType); err != nil {
 		return
 	}
+	c.JSON(http.StatusOK, FavoriteActionResp{model.BaseResp{
+		Code: 1,
+		Msg:  "点赞成功",
+	}})
+
 }
 
 func FavoriteList(c *gin.Context) {}
