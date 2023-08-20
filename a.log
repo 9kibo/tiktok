@@ -1,0 +1,114 @@
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "[WARNING] Running in \"debug\" mode. Switch to \"release\" mode in production.\n - using env:\texport GIN_MODE=release\n - using code:\tgin.SetMode(gin.ReleaseMode)\n\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /swagger/*any             --\u003e github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (3 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /test/recover             --\u003e main.initRouter.func1 (3 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/feed              --\u003e tiktok/biz/handler.Feed (3 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/user/register     --\u003e tiktok/biz/handler.Register (3 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/user/login        --\u003e tiktok/biz/handler.Login (3 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/publish/action    --\u003e tiktok/biz/handler.UpVideo (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/publish/list      --\u003e tiktok/biz/handler.VideoList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/user/             --\u003e tiktok/biz/handler.UserInfo (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/favorite/action   --\u003e tiktok/biz/handler.Favorite (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/favorite/list     --\u003e tiktok/biz/handler.FavoriteList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/comment/action    --\u003e tiktok/biz/handler.CommAction (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/comment/list      --\u003e tiktok/biz/handler.CommList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "POST   /douyin/relation/action   --\u003e tiktok/biz/handler.RelationAction (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/relation/follow/list --\u003e tiktok/biz/handler.GetFollowingList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/relation/follower/list --\u003e tiktok/biz/handler.GetFollowersList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "GET    /douyin/relation/friend/list --\u003e tiktok/biz/handler.GetFriendList (4 handlers)\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "[WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.\nPlease check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.\n",
+  "time": "2023-08-20 22:15:22"
+}
+{
+  "LogModule": "GIN",
+  "level": "debug",
+  "msg": "Listening and serving HTTP on 127.0.0.1:8080\n",
+  "time": "2023-08-20 22:15:22"
+}

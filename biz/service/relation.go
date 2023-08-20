@@ -34,33 +34,33 @@ func (s FollowServiceImpl) FollowAction(req *model.FollowActionReq) {
 	exists, err := dao.ExistsFollow(follow)
 	if err != nil {
 		s.ctx.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr)
-		logmw.LogWithRequestErr("follow", s.ctx, err).Debug("数据库异常")
+		logmw.LogWithRequestId("follow", s.ctx).WithError(err).Debug("数据库异常")
 		return
 	}
 	if req.ActionType == constant.FollowADD {
 		//已关注不能关注
 		if exists {
 			s.ctx.AbortWithStatusJSON(http.StatusConflict, errno.FollowRelationAlreadyExistErr)
-			logmw.LogWithRequest("follow", s.ctx).Debug("已关注却重新关注, 不是攻击就是前端错误")
+			logmw.LogWithRequestId("follow", s.ctx).Debug("已关注却重新关注, 不是攻击就是前端错误")
 			return
 		}
 		err = dao.AddFollow(follow)
 		if err != nil {
 			s.ctx.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr)
-			logmw.LogWithRequestErr("follow", s.ctx, err).Debug("数据库异常")
+			logmw.LogWithRequestId("follow", s.ctx).WithError(err).Debug("数据库异常")
 			return
 		}
 	} else {
 		//未关注不能取消关注
 		if !exists {
 			s.ctx.AbortWithStatusJSON(http.StatusConflict, errno.FollowRelationAlreadyExistErr)
-			logmw.LogWithRequest("follow", s.ctx).Debug("未关注却取消关注, 不是攻击就是前端错误")
+			logmw.LogWithRequestId("follow", s.ctx).Debug("未关注却取消关注, 不是攻击就是前端错误")
 			return
 		}
 		err = dao.DeleteFollow(follow)
 		if err != nil {
 			s.ctx.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr)
-			logmw.LogWithRequestErr("follow", s.ctx, err).Debug("数据库异常")
+			logmw.LogWithRequestId("follow", s.ctx).WithError(err).Debug("数据库异常")
 			return
 		}
 	}

@@ -1,5 +1,6 @@
 package constant
 
 const (
-	UserId = "userId"
+	UserId    = "userId"
+	RequestId = "requestId"
 )
