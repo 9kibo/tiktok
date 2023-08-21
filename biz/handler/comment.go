@@ -15,6 +15,7 @@ type CommentListResp struct {
 }
 
 func CommAction(c *gin.Context) {
+
 }
 
 func CommList(c *gin.Context) {}

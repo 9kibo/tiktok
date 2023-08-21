@@ -33,11 +33,15 @@ func TestFavorite(t *testing.T) {
 	}
 
 	// 查询点赞视频
-	user1Favs, _ := GetFavoriteVideoIdS(1)
+	user1Favs, _ := GetUserFavorCount(1)
+	_, err := GetUserFavorCount(2)
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
 
 	// 验证
-	if len(user1Favs) != 10 {
-		t.Errorf("expect 10 favorite for user 1, but got %d", len(user1Favs))
+	if user1Favs != 10 {
+		t.Errorf("expect 10 favorite for user 1, but got %d", user1Favs)
 	}
 
 	// 删除点赞
@@ -48,10 +52,10 @@ func TestFavorite(t *testing.T) {
 	}
 
 	// 查询点赞视频
-	user1Favs, _ = GetFavoriteVideoIdS(1)
+	user1Favs, _ = GetUserFavorCount(1)
 
 	// 验证删除
-	if len(user1Favs) != 0 {
-		t.Errorf("expect 0 favorite after delete, but got %d", len(user1Favs))
+	if user1Favs != 0 {
+		t.Errorf("expect 0 favorite after delete, but got %d", user1Favs)
 	}
 }

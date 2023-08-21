@@ -6,6 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"net/http"
 	"strconv"
+	"sync"
 	"tiktok/biz/dao"
 	"tiktok/biz/middleware/kafka"
 	"tiktok/biz/middleware/logmw"
@@ -33,6 +34,7 @@ type FavoriteService interface {
 }
 
 type FavoriteImpl struct {
+	FavoriteService
 	C *gin.Context
 }
 
@@ -51,25 +53,28 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 	defer rdb.Close()
 	if err != nil {
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		logmw.LogWithRequestErr("Favorite", F.C, err).Error("redis连接错误")
 		return err
 	}
 	//写入消息失败的回调函数
 	addBack := func(k string, v string) {
-		logmw.LogWithRequest("Favorite", F.C).Debug("kafka写入失败")
-		rdb.SRem(Rctx, userIdStr, videoId)
+		logmw.LogWithRequest("Favorite", F.C).Error("kafka写入失败")
+		rdb.ZRem(Rctx, userIdStr, videoId)
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":Kafka写入失败"))
 	}
 	delBack := func(k string, v string) {
-		logmw.LogWithRequest("Favorite", F.C).Debug("kafka写入失败")
-		rdb.SAdd(Rctx, userIdStr, videoId)
+		logmw.LogWithRequest("Favorite", F.C).Warn("kafka写入失败")
+		rdb.ZAdd(Rctx, userIdStr, redis.Z{
+			Score:  float64(time.Now().Unix()),
+			Member: v,
+		})
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":Kafka写入失败"))
 	}
 	//判断缓存中key是否存在
 	exists, err := rdb.Exists(Rctx, userIdStr).Result()
 	if err != nil {
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		logmw.LogWithRequestErr("Favorite", F.C, err).Error("redis连接错误")
 		return err
 	}
 	if exists < 1 {
@@ -77,7 +82,7 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 		err = LoadFavoriteToRides(userId, rdb, Rctx)
 		if err != nil {
 			F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-			logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis更新错误")
+			logmw.LogWithRequestErr("Favorite", F.C, err).Error("redis更新错误")
 			return err
 		}
 	} else {
@@ -89,7 +94,11 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 	var n int64
 	if actionType == 1 {
 		//点赞
-		n, err = rdb.SAdd(Rctx, userIdStr, videoIdStr).Result()
+		Now := time.Now().Unix()
+		n, err = rdb.ZAdd(Rctx, userIdStr, redis.Z{
+			Score:  float64(Now),
+			Member: videoIdStr,
+		}).Result()
 		if err != nil {
 			F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
 			logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis写入失败")
@@ -100,12 +109,12 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 			return nil
 		}
 		//更新redis成功，向消息队列发送key:UserId  value:videoId+time.now().unix(),为方便直接使用字符串拼接，追求性能可以考虑使用结构体将结构体序列化
-		value := videoIdStr + " " + strconv.FormatInt(time.Now().Unix(), 10)
+		value := videoIdStr + " " + strconv.FormatInt(Now, 10)
 		kafka.FavoriteMq.WriteMsg(userIdStr, value, addBack)
 		return nil
 	} else {
 		//取消点赞
-		n, err = rdb.SRem(Rctx, userIdStr, videoId).Result()
+		n, err = rdb.ZRem(Rctx, userIdStr, videoId).Result()
 		if err != nil {
 			F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
 			logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis删除失败")
@@ -128,10 +137,17 @@ func LoadFavoriteToRides(UserId int64, rdb *redis.Client, Rctx context.Context) 
 	if err != nil {
 		return err
 	}
+	var zs []redis.Z
+	for _, val := range VideoIds {
+		zs = append(zs, redis.Z{Score: float64(val.CreatedAt), Member: val.VideoId})
+	}
 	UserIdStr := strconv.FormatInt(UserId, 10)
-	//添加占位，防止点赞全部取消后key被删除
-	err = rdb.SAdd(Rctx, UserIdStr, -1).Err()
-	err = rdb.SAdd(Rctx, UserIdStr, VideoIds).Err()
+	//添加占位，防止点赞全部取消后key被删除，此时数据库还未更新
+	err = rdb.ZAdd(Rctx, UserIdStr, redis.Z{
+		Score:  -1,
+		Member: -1,
+	}).Err()
+	err = rdb.ZAdd(Rctx, UserIdStr, zs...).Err()
 	if err != nil {
 		return err
 	}
@@ -141,4 +157,165 @@ func LoadFavoriteToRides(UserId int64, rdb *redis.Client, Rctx context.Context) 
 		return err
 	}
 	return nil
+}
+
+// 获取点赞视频列表
+func (F *FavoriteImpl) GetFavouriteList(userId int64, curId int64) ([]*model.Video, error) {
+	userIdStr := strconv.FormatInt(userId, 10)
+	VideoServer := &VideoServiceImpl{
+		c: F.C,
+	}
+	var Rctx = context.Background()
+	rdb, err := tredis.GetRedis(8)
+	//建立redis连接
+	defer rdb.Close()
+	if err != nil {
+		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
+		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		return nil, err
+	}
+	//判断缓存中key是否存在
+	exists, err := rdb.Exists(Rctx, userIdStr).Result()
+	if err != nil {
+		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
+		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		return nil, err
+	}
+	if exists < 1 {
+		//缓存中不存在,更新缓存
+		err = LoadFavoriteToRides(userId, rdb, Rctx)
+		if err != nil {
+			F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
+			logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis更新错误")
+			return nil, err
+		}
+	} else {
+		//缓存中存在，更新缓存时间
+		if ttl, _ := rdb.TTL(Rctx, userIdStr).Result(); ttl < constant.Favorite_UserId_DefaultTime/3 {
+			rdb.Expire(Rctx, userIdStr, constant.Favorite_UserId_DefaultTime/3)
+		}
+	}
+	//获取所有点赞列表
+	var VideoIds []int64
+	vals, _ := rdb.ZRevRange(Rctx, userIdStr, 0, -1).Result()
+	for _, val := range vals {
+		id, _ := strconv.ParseInt(val, 10, 64)
+		if id == -1 {
+			//占位符
+			continue
+		}
+		VideoIds = append(VideoIds, id)
+	}
+	VideoList := make([]*model.Video, len(VideoIds))
+	var wg sync.WaitGroup
+	for i, VideoId := range VideoIds {
+		wg.Add(1)
+		go func(a int, id int64) {
+			Video, err := VideoServer.GetVideoById(id, curId)
+			if err != nil {
+				logmw.LogWithRequestErr("favorite", F.C, err).WithField("videoId:", id).Error("视频获取出错")
+				wg.Done()
+				return
+			}
+			VideoList[a] = Video
+			wg.Done()
+		}(i, VideoId)
+	}
+	wg.Wait()
+	return VideoList, nil
+}
+
+// IsFavorite 判断是否点赞该视频
+func (F *FavoriteImpl) IsFavorite(videoId int64, userId int64) (bool, error) {
+	userIdStr := strconv.FormatInt(userId, 10)
+	vidoeIdStr := strconv.FormatInt(videoId, 10)
+	var Rctx = context.Background()
+	rdb, err := tredis.GetRedis(8)
+	exists, err := rdb.Exists(Rctx, userIdStr).Result()
+	if err != nil {
+		logmw.LogWithRequestErr("Favorite", F.C, err).Warn("redis连接错误")
+	}
+	//缓存中不存在去数据库中查
+	if exists < 1 {
+		return dao.ExistsFav(userId, videoId)
+	}
+	val, _ := rdb.ZScore(Rctx, userIdStr, vidoeIdStr).Result()
+	if val == float64(0) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// FavouriteVideoCount 根据userId获取这个用户点赞视频数量
+func (F *FavoriteImpl) FavouriteVideoCount(userId int64) (n int64, err error) {
+	userIdStr := strconv.FormatInt(userId, 10)
+	var Rctx = context.Background()
+	rdb, err := tredis.GetRedis(8)
+	//建立redis连接
+	defer rdb.Close()
+	if err != nil {
+		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
+		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		return 0, err
+	}
+	//判断缓存中key是否存在
+	exists, err := rdb.Exists(Rctx, userIdStr).Result()
+	if err != nil {
+		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
+		logmw.LogWithRequestErr("Favorite", F.C, err).Debug("redis连接错误")
+		return 0, err
+	}
+	if exists > 0 {
+		n, err = rdb.ZCard(Rctx, userIdStr).Result()
+		n = n - 1 //减去占位符
+		return n, err
+	}
+	//缓存中不存在，查数据库
+	n, err = dao.GetUserFavorCount(userId)
+	return
+}
+
+// FavouriteCount 根据当前视频id获取当前视频点赞数量。
+func (F *FavoriteImpl) FavouriteCount(videoId int64) (int64, error) {
+	//缓存中 videoId->count
+	videoIdStr := strconv.FormatInt(videoId, 10)
+	var Rctx = context.Background()
+	rdb, err := tredis.GetRedis(8)
+	//建立redis连接
+	defer rdb.Close()
+	if err != nil {
+		logmw.LogWithRequestErr("Favorite", F.C, err).Error("redis连接错误")
+		return 0, err
+	}
+	//判断缓存中key是否存在
+	exists, err := rdb.Exists(Rctx, videoIdStr).Result()
+	if err != nil {
+		logmw.LogWithRequestErr("Favorite", F.C, err).Error("redis连接错误")
+	}
+	if exists < 1 {
+		//缓存中不存在,更新缓存
+		count, err := dao.GetVideoFavorCount(videoId)
+		if err != nil {
+			logmw.LogWithRequestErr("Favorite", F.C, err).Warn("mysql获取视频点赞数量出错")
+			return count, err
+		}
+		rdb.Set(Rctx, videoIdStr, count, constant.Favorite_UserId_DefaultTime)
+		return count, nil
+	} else {
+		//缓存中存在，更新缓存时间
+		if ttl, _ := rdb.TTL(Rctx, videoIdStr).Result(); ttl < constant.Favorite_UserId_DefaultTime/3 {
+			rdb.Expire(Rctx, videoIdStr, constant.Favorite_UserId_DefaultTime/3)
+		}
+	}
+	n, err := rdb.Get(Rctx, videoIdStr).Int64()
+	if err != nil {
+		logmw.LogWithRequestErr("Favorite", F.C, err).Warn("redis获取视频点赞数量出错")
+		n, err = dao.GetVideoFavorCount(videoId)
+		if err != nil {
+			logmw.LogWithRequestErr("Favorite", F.C, err).Warn("mysql获取视频点赞数量出错")
+			return n, err
+		}
+		return n, nil
+	}
+	return n, nil
 }

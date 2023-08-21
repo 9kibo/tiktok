@@ -8,7 +8,7 @@ import (
 	"tiktok/pkg/errno"
 )
 
-var FavoriteMq = GetKafka("Favorite", "AddFavorite")
+var FavoriteMq *TKafka
 
 // ConsumeFavorite 消费逻辑，在协程中异步写入数据库
 func ConsumeFavorite(tKafka *TKafka) {
