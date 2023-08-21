@@ -60,6 +60,10 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 	addBack := func(k string, v string) {
 		logmw.LogWithRequest("Favorite", F.C).Error("kafka写入失败")
 		rdb.ZRem(Rctx, userIdStr, videoId)
+		exi, _ := rdb.Exists(Rctx, videoIdStr).Result()
+		if exi > 0 {
+			rdb.Decr(Rctx, videoIdStr)
+		}
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":Kafka写入失败"))
 	}
 	delBack := func(k string, v string) {
@@ -68,6 +72,10 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 			Score:  float64(time.Now().Unix()),
 			Member: v,
 		})
+		exi, _ := rdb.Exists(Rctx, videoIdStr).Result()
+		if exi > 0 {
+			rdb.Incr(Rctx, videoIdStr)
+		}
 		F.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":Kafka写入失败"))
 	}
 	//判断缓存中key是否存在
@@ -108,7 +116,13 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 			logmw.LogWithRequest("Favorite", F.C).Debug("重复点赞")
 			return nil
 		}
-		//更新redis成功，向消息队列发送key:UserId  value:videoId+time.now().unix(),为方便直接使用字符串拼接，追求性能可以考虑使用结构体将结构体序列化
+		//更新视频被点赞数量
+		exists, _ = rdb.Exists(Rctx, videoIdStr).Result()
+		if exists > 0 {
+			rdb.Incr(Rctx, videoIdStr)
+		}
+
+		//更新redis成功，向消息队列发送key:UserId  value:videoId+time.now().unix(),为方便直接使用字符串拼接，追求性能可以使用结构体将结构体序列化
 		value := videoIdStr + " " + strconv.FormatInt(Now, 10)
 		kafka.FavoriteMq.WriteMsg(userIdStr, value, addBack)
 		return nil
@@ -123,6 +137,11 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 		if n == 0 {
 			logmw.LogWithRequest("Favorite", F.C).Debug("重复取消赞")
 			return nil
+		}
+		//更新视频被点赞数量
+		exists, _ = rdb.Exists(Rctx, videoIdStr).Result()
+		if exists > 0 {
+			rdb.Decr(Rctx, videoIdStr)
 		}
 		//更新完redis后向消息队列推送,为防止消息乱序，推送到同一个topic，根据是否有createAt时间戳来判断是删除还是增加
 		//后期优化可以考虑增加topic分片，增加消费者，使用userId作为hash对象仍然可以保证同一用户的消息顺序性
