@@ -19,7 +19,7 @@ func InitValidateWrapper(msgTag string) {
 			structCache: make(map[string]struct{}, 10),
 		},
 	}
-	v.validate.SetTagName("binding")
+	initValidator(v.validate)
 	binding.Validator = v
 }
 

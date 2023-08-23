@@ -31,14 +31,14 @@ func (v *validateWrapper) Struct(s interface{}) error {
 	}
 
 	typeNamespace := v.cacheStructFieldMsg(s)
-	errs := ValidateErrs{}
+	errs := Errs{}
 	//the validator.FieldError only is field err, has not it's struct info, so must use by the param s
 	for _, err := range err.(validator.ValidationErrors) {
 		msg := v.msgCache[typeNamespace+"."+err.Field()]
 		if msg == "" {
 			msg = err.Error()
 		}
-		errs = append(errs, ValidateErr{
+		errs = append(errs, Err{
 			Field:  err.StructField(),
 			ErrMsg: msg,
 		})
