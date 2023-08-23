@@ -1,4 +1,4 @@
-package logmw
+package ginmw
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"tiktok/pkg/utils"
 	"time"
 )
 
@@ -64,19 +65,19 @@ func WithRecovery() gin.HandlerFunc {
 				}
 				headersToStr := strings.Join(headers, "\r\n")
 				if brokenPipe {
-					LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
 						HeaderToStr: headersToStr,
 						Err:         err,
 					}, c).Info()
 				} else if gin.IsDebugging() {
-					LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
 						Time:        time.Now().Format("2006-01-02 15:04:05"),
 						HeaderToStr: headersToStr,
 						Err:         err,
 						Stack:       stack,
 					}, c).Debug()
 				} else {
-					LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
 						Time:  time.Now().Format("2006-01-02 15:04:05"),
 						Err:   err,
 						Stack: stack,

@@ -1,4 +1,4 @@
-package logmw
+package ginmw
 
 import (
 	"github.com/gin-gonic/gin"
@@ -59,6 +59,6 @@ func WithLogger(skipPaths []string) gin.HandlerFunc {
 		param.StatusCode = ctx.Writer.Status()
 		param.CompleteTimeMS = end.Sub(start)
 		param.BodySize = ctx.Writer.Size()
-		LogWithRequestIdData("requestLog", &param, ctx).Debug(ctx.Errors.ByType(gin.ErrorTypePrivate).String())
+		utils.LogWithRequestIdData("requestLog", &param, ctx).Debug(ctx.Errors.ByType(gin.ErrorTypePrivate).String())
 	}
 }

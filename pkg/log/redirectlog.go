@@ -1,9 +1,10 @@
-package logmw
+package log
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"tiktok/pkg/utils"
 )
 
 const (
@@ -48,7 +49,7 @@ func (w RedirectLog) Printf(format string, args ...interface{}) {
 }
 func (w RedirectLog) ginLog(s string) {
 	if gin.IsDebugging() {
-		Log(w.From).Debug(strings.Replace(s, "[GIN-debug] ", "", 1))
+		utils.Log(w.From).Debug(strings.Replace(s, "[GIN-debug] ", "", 1))
 	}
 }
 
@@ -79,7 +80,7 @@ func (w RedirectLog) gormLog(format string, args []interface{}) {
 			logData["elapsed"] = args[1]
 			logData["rows"] = args[2]
 			logData["sql"] = args[3]
-			LogWithData(w.From, logData).Debug("trace info")
+			utils.LogWithData(w.From, logData).Debug("trace info")
 		} else {
 			logData["elapsed"] = args[2]
 			logData["rows"] = args[3]
@@ -87,14 +88,14 @@ func (w RedirectLog) gormLog(format string, args []interface{}) {
 			if _, ok := args[1].(string); ok {
 				//l.LogLevel >= Warn
 				logData["slowLog"] = args[1]
-				LogWithData(w.From, logData).Debug("trace warn")
+				utils.LogWithData(w.From, logData).Debug("trace warn")
 			} else {
 				//l.LogLevel >= Error
 				logData["err"] = args[1]
-				LogWithData(w.From, logData).Debug("trace error")
+				utils.LogWithData(w.From, logData).Debug("trace error")
 			}
 		}
 	} else {
-		LogWithData(w.From, args[1:]).Log(level)
+		utils.LogWithData(w.From, args[1:]).Log(level)
 	}
 }

@@ -1,4 +1,4 @@
-package logmw
+package log
 
 import (
 	"github.com/gin-gonic/gin"
