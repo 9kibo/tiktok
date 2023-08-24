@@ -19,6 +19,7 @@ type TKafka struct {
 
 func Init() {
 	FavoriteMq = GetKafka("favorite", "favoriteAlter")
+	CommonMq = GetKafka("common", "commonAlter")
 
 	// go 启动消费协程
 	go ConsumeFavorite(FavoriteMq)

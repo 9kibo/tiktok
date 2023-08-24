@@ -18,6 +18,6 @@ type VideoService interface {
 	GetVideoListById(targetId int64, userId int64)
 }
 type VideoServiceImpl struct {
-	c *gin.Context
+	C *gin.Context
 	VideoService
 }

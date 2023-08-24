@@ -45,6 +45,11 @@ func NewFavorite(c *gin.Context) *FavoriteImpl {
 }
 
 func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType int32) error {
+	//判断视频是否存在
+	VideoS := &VideoServiceImpl{C: F.C}
+	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
+		F.C.AbortWithStatusJSON(http.StatusBadRequest, errno.NewErrno(errno.VideoIsNotExistErrCode, "视频不存在"))
+	}
 	userIdStr := strconv.FormatInt(userId, 10)
 	videoIdStr := strconv.FormatInt(videoId, 10)
 	var Rctx = context.Background()
@@ -178,11 +183,11 @@ func LoadFavoriteToRides(UserId int64, rdb *redis.Client, Rctx context.Context) 
 	return nil
 }
 
-// 获取点赞视频列表
+// GetFavouriteList 获取点赞视频列表
 func (F *FavoriteImpl) GetFavouriteList(userId int64, curId int64) ([]*model.Video, error) {
 	userIdStr := strconv.FormatInt(userId, 10)
 	VideoServer := &VideoServiceImpl{
-		c: F.C,
+		C: F.C,
 	}
 	var Rctx = context.Background()
 	rdb, err := tredis.GetRedis(8)

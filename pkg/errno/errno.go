@@ -6,8 +6,8 @@ import (
 )
 
 type Errno struct {
-	Code int32
-	Msg  string
+	Code int32  `json:"status_code"`
+	Msg  string `json:"status_msg"`
 }
 
 func (e Errno) Error() string {

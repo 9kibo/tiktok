@@ -1,6 +1,9 @@
 package service
 
-import "tiktok/biz/model"
+import (
+	"github.com/gin-gonic/gin"
+	"tiktok/biz/model"
+)
 
 type UserService interface {
 	//GetUserByUserName 根据name获取user
@@ -13,4 +16,6 @@ type UserService interface {
 	GetUserRespondById(id int64) *model.User
 }
 type UserServiceImpl struct {
+	C *gin.Context
+	UserService
 }
