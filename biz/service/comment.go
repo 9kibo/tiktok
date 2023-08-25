@@ -10,7 +10,6 @@ import (
 	"sync"
 	"tiktok/biz/dao"
 	"tiktok/biz/middleware/kafka"
-	"tiktok/biz/middleware/logmw"
 	tredis "tiktok/biz/middleware/redis"
 	"tiktok/biz/model"
 	"tiktok/pkg/constant"
@@ -39,12 +38,12 @@ func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text str
 	UserS := &UserServiceImpl{C: comm.C}
 	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
 		comm.C.AbortWithStatusJSON(http.StatusBadRequest, errno.NewErrno(errno.VideoIsNotExistErrCode, "视频不存在"))
-		logmw.LogWithRequestErr("comment", comm.C, err).Warn("视频不存在")
+		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("视频不存在")
 		return nil, err
 	}
 	back := func(key string, value string) {
 		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":kafka写入失败"))
-		logmw.LogWithRequest("comment", comm.C).Error("kafka写入失败")
+		utils.LogWithRequestId("Comment", comm.C).Error("kafka写入失败")
 	}
 	createAt := time.Now().Unix()
 	commId := utils.UUidToInt64ID()
@@ -77,7 +76,7 @@ func (comm *CommentServiceImpl) DelComment(VideoId, CommId int64) error {
 	rdb, err := tredis.GetRedis(9)
 	if err != nil {
 		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		logmw.LogWithRequestErr("comment", comm.C, err).Error("redis连接错误")
+		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Error("redis连接错误")
 		return err
 	}
 	exi1, _ := rdb.Exists(Rctx, VideoIdStr).Result()
@@ -91,7 +90,7 @@ func (comm *CommentServiceImpl) DelComment(VideoId, CommId int64) error {
 	back := func(string1 string, string2 string) {
 		rdb.Del(Rctx, VideoIdStr)
 		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":kafka写入失败"))
-		logmw.LogWithRequest("comment", comm.C).Error("kafka写入失败")
+		utils.LogWithRequestId("Comment", comm.C).Error("kafka写入失败")
 	}
 	kafka.CommonMq.WriteMsg("Del", CommIdStr, back)
 	return nil
@@ -107,13 +106,13 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment,
 	defer rdb.Close()
 	if err != nil {
 		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		logmw.LogWithRequestErr("comment", comm.C, err).Debug("redis连接错误")
+		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("redis连接错误")
 		return nil, err
 	}
 	exists, err := rdb.Exists(Rctx, videoIdStr).Result()
 	if err != nil {
 		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		logmw.LogWithRequestErr("comment", comm.C, err).Debug("redis连接错误")
+		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("redis连接错误")
 		return nil, err
 	}
 	wg := sync.WaitGroup{}
@@ -122,7 +121,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment,
 		comms, err := dao.GetCommList(videoId)
 		if err != nil {
 			comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr)
-			logmw.LogWithRequestErr("comment", comm.C, err).Debug("数据库连接错误")
+			utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("数据库连接错误")
 			return nil, err
 		}
 		go func(wg *sync.WaitGroup) {
@@ -130,7 +129,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment,
 			defer wg.Done()
 			err := LoadCommIdsToRedis(videoId, comms, rdb, Rctx)
 			if err != nil {
-				logmw.LogWithRequestErr("comment", comm.C, err).Warn("缓存载入失败")
+				utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("缓存载入失败")
 			}
 		}(&wg)
 		for i, val := range comms {
@@ -148,7 +147,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment,
 		commIds, err := rdb.ZRevRangeWithScores(Rctx, videoIdStr, 0, -1).Result()
 		if err != nil {
 			//降级
-			logmw.LogWithRequestErr("comment", comm.C, err).Warn("从缓存中获取评论失败")
+			utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("从缓存中获取评论失败")
 			return dao.GetCommList(videoId)
 		}
 		//组装评论
@@ -162,11 +161,11 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment,
 				var Info CommInfo
 				err := rdb.HGetAll(Rctx, v.Member.(string)).Scan(&Info)
 				if err != nil {
-					logmw.LogWithRequestErr("comment", comm.C, err).Warn("从缓存中获取评论失败")
+					utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("从缓存中获取评论失败")
 					//获取失败，降级从数据库中获取
 					commList[n], err = dao.Comm(commList[n].Id)
 					if err != nil {
-						logmw.LogWithRequestErr("comment", comm.C, err).Warn("缓存获取失败后从数据库获取评论失败")
+						utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("缓存获取失败后从数据库获取评论失败")
 					}
 				}
 			}(i, val)
