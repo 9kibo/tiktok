@@ -6,9 +6,10 @@ import (
 	"os"
 	"tiktok/biz/config"
 	"tiktok/biz/dao"
+	"tiktok/biz/middleware/ginmw"
 	"tiktok/biz/middleware/kafka"
-	"tiktok/biz/middleware/logmw"
-	"tiktok/biz/middleware/mswagger"
+	logmw "tiktok/pkg/log"
+	"tiktok/pkg/swagger"
 )
 
 func Init() {
@@ -39,8 +40,8 @@ func Init() {
 func main() {
 	Init()
 	e := gin.New()
-	e.Use(logmw.WithRecovery(), logmw.WithLogger(nil))
-	mswagger.InitSwagger(e)
+	e.Use(ginmw.WithRecovery(), ginmw.WithLogger(nil))
+	swagger.InitSwagger(e)
 	initRouter(e)
 	if err := e.Run(config.C.Server.Addr); err != nil {
 		panic(err)
