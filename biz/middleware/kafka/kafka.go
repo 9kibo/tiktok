@@ -23,6 +23,7 @@ func Init() {
 
 	// go 启动消费协程
 	go ConsumeFavorite(FavoriteMq)
+	go ConsumeComm(CommonMq)
 }
 func GetKafka(Topic string, Group string) *TKafka {
 	w := &kafka.Writer{

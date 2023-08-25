@@ -19,12 +19,12 @@ type CommToJson struct {
 
 type CommReq struct {
 	UserId    int64
-	VideoId   int64  `from:"video_id" binging:"gt=0"`
-	Action    int64  `from:"action_type" binging:"oneof=1 2"`
-	Text      string `from:"comment_text" binging:"omitempty"`
-	DelCommId int64  `from:"comment_id" binging:"omitempty"`
+	VideoId   int64  `form:"video_id" binging:"gt=0"`
+	Action    int64  `form:"action_type" binging:"oneof=1 2"`
+	Text      string `form:"comment_text" binging:"omitempty"`
+	DelCommId int64  `form:"comment_id" binging:"omitempty"`
 }
 type CommentsReq struct {
 	UserId  int64
-	VideoId int64 `from:"video_id" binging:"gt=0"`
+	VideoId int64 `form:"video_id" binging:"gt=0"`
 }

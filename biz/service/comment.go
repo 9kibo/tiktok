@@ -214,11 +214,11 @@ func LoadCommIdsToRedis(VideoId int64, CommIds []*model.Comment, rdb *redis.Clie
 			Content: val.Content,
 		}, constant.Comment_CommId_DefaultTime)
 	}
-	err := rdb.ZAdd(Rctx, VideoIdStr, redis.Z{
+	zs = append(zs, redis.Z{
 		Score:  -1,
 		Member: -1,
-	}).Err()
-	err = rdb.ZAdd(Rctx, VideoIdStr, zs...).Err()
+	})
+	err := rdb.ZAdd(Rctx, VideoIdStr, zs...).Err()
 	if err != nil {
 		return err
 	}

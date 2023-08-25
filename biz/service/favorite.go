@@ -167,10 +167,10 @@ func LoadFavoriteToRides(UserId int64, rdb *redis.Client, Rctx context.Context) 
 	}
 	UserIdStr := strconv.FormatInt(UserId, 10)
 	//添加占位，防止点赞全部取消后key被删除，此时数据库还未更新
-	err = rdb.ZAdd(Rctx, UserIdStr, redis.Z{
+	zs = append(zs, redis.Z{
 		Score:  -1,
 		Member: -1,
-	}).Err()
+	})
 	err = rdb.ZAdd(Rctx, UserIdStr, zs...).Err()
 	if err != nil {
 		return err
