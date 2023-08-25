@@ -8,6 +8,7 @@ import (
 )
 
 type Logger struct {
+	Filepath    string
 	LogrusLevel string
 	GormLevel   string
 	GinLevel    string

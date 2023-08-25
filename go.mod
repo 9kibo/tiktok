@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/segmentio/kafka-go v0.4.42

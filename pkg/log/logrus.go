@@ -1,4 +1,4 @@
-package logmw
+package log
 
 import (
 	"github.com/gin-gonic/gin"
@@ -13,8 +13,16 @@ import (
 func InitLog() (logger.LogLevel, logger.Writer) {
 	loggerConfig := config.C.Logger
 	//logrus
-	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(loggerConfig.GetLogrusLogLevel())
+	if loggerConfig.Filepath != "" {
+		file, err := os.OpenFile(loggerConfig.Filepath, os.O_CREATE|os.O_APPEND|os.O_RDWR, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+		logrus.SetOutput(file)
+	} else {
+		logrus.SetOutput(os.Stdout)
+	}
 	logrus.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 		PrettyPrint:     logrus.IsLevelEnabled(logrus.DebugLevel),

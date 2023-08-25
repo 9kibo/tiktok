@@ -68,7 +68,7 @@ func (t Jwt) CreateToken(public PublicClaims) (string, error) {
 	token := jwt.NewWithClaims(t.Alg, &MClaims{
 		Public: public,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        utils.UUId(),
+			ID:        utils.UUID4(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(t.ExpireDay) * 24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    t.Issuer,
