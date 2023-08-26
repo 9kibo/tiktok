@@ -1,10 +1,13 @@
 package kafka
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"tiktok/biz/dao"
+	tredis "tiktok/biz/middleware/redis"
 	"tiktok/biz/model"
 )
 
@@ -38,5 +41,12 @@ func ConsumeComm(tKafka *TKafka) {
 				logrus.WithField("kafka", msg).WithField("Info", fmt.Sprintf("%v", CommInfo)).Warn("删除评论失败")
 			}
 		}
+		Rctx := context.Background()
+		rdb, err := tredis.GetRedis(9)
+		if err != nil {
+			logrus.WithField("redisErr:", err).Warn("redis连接失败")
+		}
+		rdb.Del(Rctx, strconv.FormatInt(CommInfo.CommId, 10))
+		rdb.Del(Rctx, strconv.FormatInt(CommInfo.VideoId, 10))
 	}
 }
