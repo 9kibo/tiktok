@@ -1,17 +1,4 @@
 basePath: /
-definitions:
-  model.BaseResp:
-    properties:
-      status_code:
-        description: 业务响应码
-        example: 1
-        type: integer
-      status_msg:
-        description: 业务消息
-        example: xxxx
-        type: string
-    type: object
-host: videotools.cn
 info:
   contact:
     email: 584807419@qq.com
@@ -25,8 +12,8 @@ info:
   title: mock tiktok
   version: 1.0 版本
 paths:
-  /re:
-    get:
+  /douyin/relation/action:
+    post:
       consumes:
       - application/json
       description: 关注或者取消关注用户
@@ -47,18 +34,72 @@ paths:
         "200":
           description: OK
         "400":
-          description: Bad Request
+          description: 参数不正确
           schema:
-            $ref: '#/definitions/model.BaseResp'
+            type: body
         "403":
-          description: Forbidden
+          description: 未登录
           schema:
-            $ref: '#/definitions/model.BaseResp'
+            type: body
         "500":
-          description: Internal Server Error
+          description: 系统错误
           schema:
-            $ref: '#/definitions/model.BaseResp'
-      summary: 用户关系操作
+            type: body
+      summary: 关注操作
       tags:
       - Relation
+  /douyin/relation/follow/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: 关注列表
+      tags:
+      - Relation
+  /douyin/relation/follower/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: 粉丝列表
+      tags:
+      - Relation
+  /douyin/relation/friend/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: 好友列表
+      tags:
+      - Message
 swagger: "2.0"

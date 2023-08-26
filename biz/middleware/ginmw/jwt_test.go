@@ -18,7 +18,7 @@ func initJwt() *Jwt {
 }
 func TestParseToken(t *testing.T) {
 	j := initJwt()
-	token, err := j.CreateToken(PublicClaims{
+	token, err := j.CreateToken(&PublicClaims{
 		UserId: 123,
 	})
 	if err != nil {

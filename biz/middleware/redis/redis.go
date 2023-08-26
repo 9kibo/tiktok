@@ -14,7 +14,18 @@ var Ctx = context.Background()
 互动模块使用 db 8，9，10，11
 社交模块使用 db 12，13，14，15
 */
+var (
+	followClient *redis.Client
+)
 
+func Init() {
+	var err error
+	followClient, err = GetRedis(12)
+	if err != nil {
+		panic(err)
+	}
+
+}
 func GetRedis(db int) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.C.Redis.Addr,

@@ -25,13 +25,13 @@ func WithJwtAuth(jwt *Jwt) gin.HandlerFunc {
 			token = c.Request.PostFormValue(JWT.TokenKey)
 		}
 		if len(token) == 0 {
-			c.JSON(http.StatusUnauthorized, model.BuildBaseResp(errno.AuthorizationFailedErr))
+			c.JSON(http.StatusUnauthorized, model.BuildBaseResp(errno.AuthorizationFailed))
 			c.Abort()
 			return
 		}
 		claims, err := JWT.ParseToken(token)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, model.BuildBaseResp(errno.AuthorizationFailedErr.AppendMsg(err.Error())))
+			c.JSON(http.StatusUnauthorized, model.BuildBaseResp(errno.AuthorizationFailed.AppendMsg(err.Error())))
 			c.Abort()
 			return
 		}
@@ -53,7 +53,7 @@ type PublicClaims struct {
 }
 type MClaims struct {
 	jwt.RegisteredClaims
-	Public PublicClaims
+	Public *PublicClaims
 }
 
 func (c MClaims) Validate() error {
@@ -64,7 +64,7 @@ func (c MClaims) Validate() error {
 }
 
 // CreateToken 生成token
-func (t Jwt) CreateToken(public PublicClaims) (string, error) {
+func (t Jwt) CreateToken(public *PublicClaims) (string, error) {
 	token := jwt.NewWithClaims(t.Alg, &MClaims{
 		Public: public,
 		RegisteredClaims: jwt.RegisteredClaims{

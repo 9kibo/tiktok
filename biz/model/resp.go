@@ -7,14 +7,18 @@ import (
 // BaseResp 基础响应体
 type BaseResp struct {
 	//业务响应码
-	Code int32 `json:"status_code,omitempty" example:"1"`
+	Code int `json:"status_code,omitempty" example:"1"`
 	//业务消息
 	Msg string `json:"status_msg,omitempty" example:"xxxx"`
 }
 
+var (
+	RespSuccess = *baseResp(errno.Success)
+)
+
 // BuildBindResp for gin bind struct mapping request args err
 func BuildBindResp(err error) *BaseResp {
-	return baseResp(errno.ParamErr.AppendMsg(err.Error()))
+	return baseResp(errno.Param.WithMessage(err.Error()))
 }
 
 // BuildBaseResp convert error and build BaseResp

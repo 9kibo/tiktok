@@ -27,8 +27,8 @@ func Validate(data interface{}) (string, int) {
 	err = validate.Struct(data)
 	if err != nil {
 		for _, v := range err.(validator.ValidationErrors) {
-			return v.Translate(trans), errno.ParamErrCode
+			return v.Translate(trans), errno.ParamCode
 		}
 	}
-	return "", errno.ParamErrCode
+	return "", errno.ParamCode
 }

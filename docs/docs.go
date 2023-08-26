@@ -25,8 +25,8 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/re": {
-            "get": {
+        "/douyin/relation/action": {
+            "post": {
                 "description": "关注或者取消关注用户",
                 "consumes": [
                     "application/json"
@@ -37,7 +37,7 @@ const docTemplate = `{
                 "tags": [
                     "Relation"
                 ],
-                "summary": "用户关系操作",
+                "summary": "关注操作",
                 "parameters": [
                     {
                         "type": "integer",
@@ -59,40 +59,107 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "参数不正确",
                         "schema": {
-                            "$ref": "#/definitions/model.BaseResp"
+                            "type": "body"
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
+                        "description": "未登录",
                         "schema": {
-                            "$ref": "#/definitions/model.BaseResp"
+                            "type": "body"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "系统错误",
                         "schema": {
-                            "$ref": "#/definitions/model.BaseResp"
+                            "type": "body"
                         }
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "model.BaseResp": {
-            "type": "object",
-            "properties": {
-                "status_code": {
-                    "description": "业务响应码",
-                    "type": "integer",
-                    "example": 1
-                },
-                "status_msg": {
-                    "description": "业务消息",
-                    "type": "string",
-                    "example": "xxxx"
+        },
+        "/douyin/relation/follow/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Relation"
+                ],
+                "summary": "关注列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/douyin/relation/follower/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Relation"
+                ],
+                "summary": "粉丝列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/douyin/relation/friend/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "好友列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
                 }
             }
         }
@@ -102,7 +169,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0 版本",
-	Host:             "videotools.cn",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "mock tiktok",

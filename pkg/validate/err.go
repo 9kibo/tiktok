@@ -4,18 +4,18 @@ import (
 	"strings"
 )
 
-type ValidateErr struct {
+type Err struct {
 	Field  string `json:"field"`
 	ErrMsg string `json:"errMsg"`
 }
 
-func (err ValidateErr) Error() string {
+func (err Err) Error() string {
 	return err.Field + ": " + err.ErrMsg
 }
 
-type ValidateErrs []ValidateErr
+type Errs []Err
 
-func (errs ValidateErrs) Error() string {
+func (errs Errs) Error() string {
 	sb := strings.Builder{}
 	errLen := len(errs)
 	for i, err := range errs {

@@ -1,3 +1,12 @@
+//Package dao
+/**
+get:
+	1. if not record, return errno.NotExists(if ignore not record use Find not Take or First)
+exists:
+	1. has->true, hasn't->false, if db err return false and err
+update:
+	1. need check RowsAffected
+*/
 package dao
 
 import (

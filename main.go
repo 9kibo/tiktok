@@ -2,26 +2,23 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"os"
 	"tiktok/biz/config"
 	"tiktok/biz/dao"
+	"tiktok/biz/middleware/ginmw"
 	"tiktok/biz/middleware/kafka"
-	"tiktok/biz/middleware/logmw"
-	"tiktok/biz/middleware/mswagger"
+	"tiktok/biz/middleware/redis"
+	"tiktok/pkg/log"
+	"tiktok/pkg/swagger"
+	"tiktok/pkg/validate"
 )
 
 func Init() {
-	//logrus未初始化时使用控制台格式化json日志
-	logrus.SetOutput(os.Stdout)
-	logrus.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: "2006-01-02 15:04:05",
-		PrettyPrint:     true,
-	})
 	config.Init("config.ini")
-	gormLogLevel, gormLogWriter := logmw.InitLog()
+	gormLogLevel, gormLogWriter := log.InitLog()
 	dao.Init(gormLogLevel, gormLogWriter)
 	kafka.Init()
+	redis.Init()
+	validate.InitValidateWrapper("")
 }
 
 // @title mock tiktok
@@ -33,14 +30,13 @@ func Init() {
 // @contact.email 584807419@qq.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host videotools.cn
 // @BasePath /
 // @query.collection.format multi
 func main() {
 	Init()
 	e := gin.New()
-	e.Use(logmw.WithRecovery(), logmw.WithLogger(nil))
-	mswagger.InitSwagger(e)
+	e.Use(ginmw.WithRecovery(), ginmw.WithLogger(nil))
+	swagger.InitSwagger(e)
 	initRouter(e)
 	if err := e.Run(config.C.Server.Addr); err != nil {
 		panic(err)

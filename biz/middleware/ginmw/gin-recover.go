@@ -65,19 +65,19 @@ func WithRecovery() gin.HandlerFunc {
 				}
 				headersToStr := strings.Join(headers, "\r\n")
 				if brokenPipe {
-					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRID(ginRecovery, &ginRecoveryLogParam{
 						HeaderToStr: headersToStr,
 						Err:         err,
 					}, c).Info()
 				} else if gin.IsDebugging() {
-					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRID(ginRecovery, &ginRecoveryLogParam{
 						Time:        time.Now().Format("2006-01-02 15:04:05"),
 						HeaderToStr: headersToStr,
 						Err:         err,
 						Stack:       stack,
 					}, c).Debug()
 				} else {
-					utils.LogWithRequestIdData(ginRecovery, &ginRecoveryLogParam{
+					utils.LogWithRID(ginRecovery, &ginRecoveryLogParam{
 						Time:  time.Now().Format("2006-01-02 15:04:05"),
 						Err:   err,
 						Stack: stack,

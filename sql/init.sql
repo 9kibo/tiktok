@@ -10,32 +10,32 @@ create table if not exists user
     created_at       bigint        not null,
     deleted_at       bigint        not null default 0,
 
-    username             varchar(32)   not null,
+    username         varchar(32)   not null,
     password         varchar(32)   not null,
     avatar           varchar(1024) not null default '',
     background_image varchar(1024) not null default '',
     signature        varchar(1024) not null default '',
     primary key pk (id),
-    unique key uk(username)
+    unique key uk (username)
 );
 
-create table  if not exists video
+create table if not exists video
 (
-    id             bigint        not null auto_increment,
-    created_at     bigint        not null,
-    updated_at     bigint        not null default 0,
-    deleted_at     bigint        not null default 0,
+    id          bigint        not null auto_increment,
+    created_at  bigint        not null,
+    updated_at  bigint        not null default 0,
+    deleted_at  bigint        not null default 0,
 
-    author_id      bigint        not null,
-    title          varchar(32)   not null,
-    play_url       varchar(1024) not null default '',
-    cover_url      varchar(1024) not null default '',
+    author_id   bigint        not null,
+    title       varchar(32)   not null,
+    play_url    varchar(1024) not null default '',
+    cover_url   varchar(1024) not null default '',
 
-    is_favorite    tinyint(1)    not null default 0,
+    is_favorite tinyint(1)    not null default 0,
     primary key pk (id)
 );
 
-create table if not exists  comment
+create table if not exists comment
 (
     id         bigint        not null auto_increment,
     created_at bigint        not null,
@@ -46,7 +46,7 @@ create table if not exists  comment
 );
 
 
-create table  if not exists video_favor
+create table if not exists video_favor
 (
     id         bigint not null auto_increment,
     created_at bigint not null,
@@ -56,17 +56,26 @@ create table  if not exists video_favor
     unique key uk (user_id, video_id)
 );
 
-create table  if not exists follow
+create table if not exists follow
 (
-    id         bigint not null auto_increment,
-    created_at bigint not null,
-    followee_id   bigint default 0 not null comment '被关注的人',
-    follower_id bigint default 0 not null  comment '关注者',
-    primary key pk(id),
+    id          bigint           not null auto_increment,
+    created_at  bigint           not null,
+    followee_id bigint default 0 not null comment '被关注的人',
+    follower_id bigint default 0 not null comment '关注者',
+    primary key pk (id),
     index ifee (follower_id),
     index ifer (followee_id)
 );
 
 
 
-
+create table if not exists message
+(
+    id           bigint        not null auto_increment,
+    created_at   bigint        not null,
+    from_user_id bigint        not null,
+    to_user_id   bigint        not null,
+    content      varchar(1024) not null comment 'max=1024',
+    primary key pk (id),
+    index ik_u (from_user_id, to_user_id)
+);

@@ -12,27 +12,27 @@ import (
 )
 
 func initRouter(e *gin.Engine) {
-	apiRouter := e.Group("/douyin")
+	apiRouter := e.Group("douyin")
 	{
-		apiRouter.GET("feed", handler.Feed)
-		apiRouter.POST("user/register", handler.Register)
-		apiRouter.POST("user/login", handler.Login)
+		apiRouter.GET("feed/", handler.Feed)
+		apiRouter.POST("user/register/", handler.Register)
+		apiRouter.POST("user/login/", handler.Login)
 	}
 	{
 		withLoginRoute := apiRouter.Group("", WithJwtAuth())
-		withLoginRoute.POST("publish/action", handler.UpVideo)
-		withLoginRoute.GET("publish/list", handler.VideoList)
+		withLoginRoute.POST("publish/action/", handler.UpVideo)
+		withLoginRoute.GET("publish/list/", handler.VideoList)
 		withLoginRoute.GET("user/", handler.UserInfo)
 		//互动
-		withLoginRoute.POST("favorite/action", handler.Favorite)
-		withLoginRoute.GET("favorite/list", handler.FavoriteList)
-		withLoginRoute.POST("comment/action", handler.CommAction)
-		withLoginRoute.GET("comment/list", handler.CommList)
+		withLoginRoute.POST("favorite/action/", handler.Favorite)
+		withLoginRoute.GET("favorite/list/", handler.FavoriteList)
+		withLoginRoute.POST("comment/action/", handler.CommAction)
+		withLoginRoute.GET("comment/list/", handler.CommList)
 		//社交
-		withLoginRoute.POST("relation/action", handler.RelationAction)
-		withLoginRoute.GET("relation/follow/list", handler.GetFollowingList)
-		withLoginRoute.GET("relation/follower/list", handler.GetFollowersList)
-		withLoginRoute.GET("relation/friend/list", handler.GetFriendList)
+		withLoginRoute.POST("relation/action/", handler.RelationAction)
+		withLoginRoute.GET("relation/follow/list/", handler.GetFollowingList)
+		withLoginRoute.GET("relation/follower/list/", handler.GetFollowersList)
+		withLoginRoute.GET("relation/friend/list/", handler.GetFriendList)
 	}
 }
 func WithJwtAuth() gin.HandlerFunc {

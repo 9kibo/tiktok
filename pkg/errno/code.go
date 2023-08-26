@@ -1,13 +1,12 @@
 package errno
 
 const (
-	SuccessCode    = 0
-	ServiceErrCode = iota + 1000
-	ParamErrCode
-	AuthorizationFailedErrCode
+	SuccessCode = 0
+	ServiceCode = iota + 1000
+	ParamCode
+	AuthorizationFailedCode
 
-	UserAlreadyExistErrCode
-	UserIsNotExistErrCode
+	UserAlreadyExistCode
 
 	FollowRelationAlreadyExistErrCode
 	FollowRelationNotExistErrCode
@@ -21,4 +20,6 @@ const (
 
 	VideoIsNotExistErrCode
 	CommentIsNotExistErrCode
+
+	MessageChatToUserNotExistCode
 )

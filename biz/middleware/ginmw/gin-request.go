@@ -8,13 +8,12 @@ import (
 )
 
 type LogRequest struct {
-	ClientIP       string
-	Method         string
-	Path           string
-	ContentType    string
-	BodySize       int
-	StatusCode     int
-	CompleteTimeMS time.Duration
+	ClientIP     string
+	Method       string
+	Path         string
+	RespBodySize int
+	StatusCode   int
+	LatencyMs    float64
 }
 
 // WithLogger gin的打印请求中间件
@@ -53,12 +52,15 @@ func WithLogger(skipPaths []string) gin.HandlerFunc {
 
 		param.ClientIP = ctx.ClientIP()
 		param.Method = ctx.Request.Method
-		if len(ctx.Request.Header["Content-Type"]) != 0 {
-			param.ContentType = ctx.Request.Header["Content-Type"][0]
-		}
 		param.StatusCode = ctx.Writer.Status()
-		param.CompleteTimeMS = end.Sub(start)
-		param.BodySize = ctx.Writer.Size()
-		utils.LogWithRequestIdData("requestLog", &param, ctx).Debug(ctx.Errors.ByType(gin.ErrorTypePrivate).String())
+		latency := end.Sub(start)
+		if latency < time.Millisecond {
+			latency = latency.Truncate(time.Nanosecond)
+			param.LatencyMs = float64(latency.Microseconds()) / 1000
+		} else {
+			param.LatencyMs = float64(latency.Milliseconds())
+		}
+		param.RespBodySize = ctx.Writer.Size()
+		utils.LogWithRID("requestLog", &param, ctx).Debug(ctx.Errors.ByType(gin.ErrorTypePrivate).String())
 	}
 }

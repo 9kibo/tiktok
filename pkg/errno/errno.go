@@ -5,17 +5,26 @@ import (
 	"fmt"
 )
 
+func NewErrno(code int, msg string) Errno {
+	return Errno{code, msg}
+}
+
+// Errno 详细响应码
 type Errno struct {
-	Code int32
-	Msg  string
+	Code int    `json:"status_code,omitempty" example:"1"`
+	Msg  string `json:"status_msg,omitempty" example:"xxxx"`
 }
 
 func (e Errno) Error() string {
 	return fmt.Sprintf("code=%d, msg=%s", e.Code, e.Msg)
 }
 
-func NewErrno(code int32, msg string) Errno {
-	return Errno{code, msg}
+var (
+	empty = Errno{}
+)
+
+func (e Errno) IsEmpty() bool {
+	return e == empty
 }
 
 // WithMessage Errno的替换msg
@@ -36,7 +45,7 @@ func ConvertErr(err error) Errno {
 		return Err
 	}
 
-	s := ServiceErr
+	s := Service
 	s.Msg = err.Error()
 	return s
 }

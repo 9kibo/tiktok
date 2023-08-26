@@ -54,9 +54,7 @@ func TestGetFollowerList(t *testing.T) {
 		FolloweeId: followeeId,
 		FollowerId: followerId,
 	}))
-	followings, err := GetFollowerList(&model.Follow{
-		FolloweeId: followeeId,
-	})
+	followings, err := GetFollowerList(followeeId)
 	assert.NoError(t, err)
 	assert.True(t, followings[0].FollowerId == followerId)
 	assert.NoError(t, DeleteFollow(&model.Follow{
@@ -72,13 +70,20 @@ func TestGetFolloweeList(t *testing.T) {
 		FolloweeId: followeeId,
 		FollowerId: followerId,
 	}))
-	followings, err := GetFolloweeList(&model.Follow{
-		FollowerId: followerId,
-	})
+	followings, err := GetFollowList(followerId)
 	assert.NoError(t, err)
 	assert.True(t, followings[0].FolloweeId == followeeId)
 	assert.NoError(t, DeleteFollow(&model.Follow{
 		FolloweeId: followeeId,
 		FollowerId: followerId,
 	}))
+}
+
+func TestGetFollowingCount(t *testing.T) {
+	_, err := GetFollowingCount(222)
+	assert.NoError(t, err)
+}
+func TestGetFollowerCount(t *testing.T) {
+	_, err := GetFollowerCount(222)
+	assert.NoError(t, err)
 }

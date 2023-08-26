@@ -2,13 +2,23 @@ package config
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
+	"os"
 )
 
 var (
 	C *Configuration
 )
 
+func init() {
+	//logrus未初始化时使用控制台格式化json日志
+	logrus.SetOutput(os.Stdout)
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+		PrettyPrint:     true,
+	})
+}
 func Init(path string) {
 	var err error
 
