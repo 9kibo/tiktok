@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"tiktok/biz/dao"
-	tredis "tiktok/biz/middleware/redis"
+	"tiktok/biz/middleware/redis"
 	"tiktok/biz/model"
 )
 
@@ -42,7 +42,7 @@ func ConsumeComm(tKafka *TKafka) {
 			}
 		}
 		Rctx := context.Background()
-		rdb, err := tredis.GetRedis(9)
+		rdb, err := redis.GetRedis(9)
 		if err != nil {
 			logrus.WithField("redisErr:", err).Warn("redis连接失败")
 		}

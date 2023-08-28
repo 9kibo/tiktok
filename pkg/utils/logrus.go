@@ -21,7 +21,9 @@ func LogWithRequestId(ctx *gin.Context, module string, err error) *logrus.Entry 
 	requestId, _ := ctx.Get(constant.RequestId)
 	return logrus.WithField(constant.RequestId, requestId).WithField(constant.LogModule, module).WithError(err)
 }
-
+func LogWithRidString(module string, Rid string, err error) *logrus.Entry {
+	return logrus.WithField(constant.RequestId, Rid).WithField(constant.LogModule, module).WithError(err)
+}
 func LogWithRID(module string, data any, ctx *gin.Context) *logrus.Entry {
 	requestId, _ := ctx.Get(constant.RequestId)
 	return logrus.WithField(constant.RequestId, requestId).WithField(constant.LogModule, module).WithField(constant.LogData, data)

@@ -5,5 +5,5 @@ import (
 )
 
 const (
-	Favorite_UserId_DefaultTime = 72 * time.Hour
+	Favorite_UserId_DefaultTime = time.Hour
 )

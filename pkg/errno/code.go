@@ -20,6 +20,7 @@ const (
 
 	VideoIsNotExistErrCode
 	CommentIsNotExistErrCode
+	CommentActionErrCode
 
 	MessageChatToUserNotExistCode
 )

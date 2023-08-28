@@ -31,13 +31,13 @@ func ConsumeFavorite(tKafka *TKafka) {
 				logrus.WithFields(logrus.Fields{
 					"UserId":  UserId,
 					"VideoId": VideoId,
-					"Action":  len(value),
+					"Action":  len(value) ^ 3,
 				}).Warn("重复点赞或取消点赞")
 			}
 			logrus.WithFields(logrus.Fields{
 				"UserId":  UserId,
 				"VideoId": VideoId,
-				"Action":  len(value),
+				"Action":  len(value) ^ 3,
 			}).Error("数据写入失败")
 		}
 	}

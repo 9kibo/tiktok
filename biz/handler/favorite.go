@@ -23,11 +23,11 @@ func Favorite(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.BuildBindResp(err))
 	}
 	F := service.NewFavorite(c)
-	err := F.FavouriteAction(req.UserId, req.VideoId, req.ActionType)
-	if err != nil || c.IsAborted() {
+	F.FavouriteAction(req.UserId, req.VideoId, req.ActionType)
+	if c.IsAborted() {
 		return
 	}
-	c.JSON(http.StatusOK, FavoriteActionResp{model.BuildBaseResp(err)})
+	respOfUpdate(c)
 
 }
 
@@ -38,12 +38,12 @@ func FavoriteList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.BuildBindResp(err))
 	}
 	F := service.NewFavorite(c)
-	List, err := F.GetFavouriteList(req.UserId, req.CurUserId)
-	if err != nil || c.IsAborted() {
+	List := F.GetFavouriteList(req.UserId, req.CurUserId)
+	if c.IsAborted() {
 		return
 	}
 	c.JSON(http.StatusOK, FavoriteListResp{
-		model.BuildBaseResp(err),
+		model.BuildBaseResp(nil),
 		List,
 	})
 }

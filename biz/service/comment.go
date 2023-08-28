@@ -30,20 +30,17 @@ type CommentServiceImpl struct {
 	UserService
 }
 
-// 评论使用旁路缓存策略，保证高一致性
 // 添加评论
 func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text string) (*model.Comment, error) {
 	//判断视频是否存在
 	VideoS := &VideoServiceImpl{C: comm.C}
-	UserS := &UserServiceImpl{C: comm.C}
+	UserS := &UserServiceImpl{ctx: comm.C}
 	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
-		comm.C.AbortWithStatusJSON(http.StatusBadRequest, errno.NewErrno(errno.VideoIsNotExistErrCode, "视频不存在"))
-		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("视频不存在")
-		return nil, err
+		utils.LogWithRequestId(comm.C, "Comment", err)
+		utils.LogBizErr(comm.C, errno.VideoIsNotExistErr, http.StatusOK, "视频不存在")
 	}
 	back := func(key string, value string) {
-		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":kafka写入失败"))
-		utils.LogWithRequestId("Comment", comm.C).Error("kafka写入失败")
+		utils.LogBizErr(comm.C, errno.CommentActionErr, http.StatusOK, "kafka写入失败")
 	}
 	createAt := time.Now().Unix()
 	commId := utils.UUidToInt64ID()
