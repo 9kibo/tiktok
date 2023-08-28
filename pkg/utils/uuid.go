@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/google/uuid"
+	"encoding/binary"
 	"strconv"
 	"time"
 )
@@ -35,4 +36,12 @@ func UUID4() string {
 		return strconv.FormatInt(time.Now().UnixNano(), 10)
 	}
 	return id.String()
+}
+
+// 利用uuid生成int64的全局id，
+func UUidToInt64ID() int64 {
+	uuidObj, _ := uuid.NewUUID()
+	bytes, _ := uuidObj.MarshalBinary()
+	int64ID := int64(binary.BigEndian.Uint64(bytes[8:]))
+	return int64ID
 }

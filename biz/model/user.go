@@ -13,11 +13,12 @@ type User struct {
 	CreatedAt int64 `json:"-"`
 	DeletedAt int64 `json:"-"`
 
-	Username        string `json:"name,omitempty"`
-	Password        string `json:"-"`
-	Avatar          string `json:"avatar"`
-	BackgroundImage string `json:"background_image"`
-	Signature       string `json:"signature"`
+	Username        string       `json:"name,omitempty"`
+	Password        string       `json:"-"`
+	Avatar          string       `json:"avatar"`
+	BackgroundImage string       `json:"background_image"`
+	Signature       string       `json:"signature"`
+	FavoriteVideos  []VideoFavor `gorm:"goreirgkey:UserId"` //一对多
 
 	FollowingCount int64 `json:"follow_count" gorm:"-"`
 	FollowerCount  int64 `json:"follower_count" gorm:"-"`

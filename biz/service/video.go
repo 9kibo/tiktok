@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"tiktok/biz/model"
 	"time"
@@ -17,4 +18,6 @@ type VideoService interface {
 	GetVideoListById(targetId int64, userId int64)
 }
 type VideoServiceImpl struct {
+	C *gin.Context
+	VideoService
 }

@@ -19,9 +19,11 @@ type TKafka struct {
 
 func Init() {
 	FavoriteMq = GetKafka("favorite", "favoriteAlter")
+	CommonMq = GetKafka("common", "commonAlter")
 
 	// go 启动消费协程
-	go FavConsumer(FavoriteMq)
+	go ConsumeFavorite(FavoriteMq)
+	go ConsumeComm(CommonMq)
 }
 func GetKafka(Topic string, Group string) *TKafka {
 	w := &kafka.Writer{
