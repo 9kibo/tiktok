@@ -5,5 +5,5 @@ import (
 )
 
 const (
-	Comment_CommId_DefaultTime = 72 * time.Hour
+	Comment_CommId_DefaultTime = time.Hour
 )

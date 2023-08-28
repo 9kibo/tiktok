@@ -21,8 +21,8 @@ import (
 type CommentService interface {
 	// GetCommCountFromVId 根据视频id获取评论数量
 	GetCommCountFromVId(id int64) (int64, error)
-	AddComment(userId int64, videoId int64, text string) (*model.Comment, error)
-	DelComment(VideoId, CommId int64) error
+	AddComment(userId int64, videoId int64, text string) *model.Comment
+	DelComment(userId, CommId int64)
 	GetCommentList(videoId int64) ([]*model.Comment, error)
 }
 type CommentServiceImpl struct {
@@ -31,16 +31,13 @@ type CommentServiceImpl struct {
 }
 
 // 添加评论
-func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text string) (*model.Comment, error) {
+func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text string) *model.Comment {
 	//判断视频是否存在
 	VideoS := &VideoServiceImpl{C: comm.C}
 	UserS := &UserServiceImpl{ctx: comm.C}
 	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
 		utils.LogWithRequestId(comm.C, "Comment", err)
 		utils.LogBizErr(comm.C, errno.VideoIsNotExistErr, http.StatusOK, "视频不存在")
-	}
-	back := func(key string, value string) {
-		utils.LogBizErr(comm.C, errno.CommentActionErr, http.StatusOK, "kafka写入失败")
 	}
 	createAt := time.Now().Unix()
 	commId := utils.UUidToInt64ID()
@@ -60,116 +57,97 @@ func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text str
 		Content:   text,
 		User:      user,
 	}
-	kafka.CommonMq.WriteMsg("Add", string(commjson), back)
-	return commReq, nil
+	kafka.CommonMq.WriteMsg("Add", string(commjson), func(key string, value string) {
+		utils.LogBizErr(comm.C, errno.CommentActionErr, http.StatusOK, "kafka写入失败")
+	})
+	return commReq
 }
 
 // 删除评论
-func (comm *CommentServiceImpl) DelComment(VideoId, CommId int64) error {
-	VideoIdStr := strconv.FormatInt(VideoId, 10)
-	CommIdStr := strconv.FormatInt(CommId, 10)
-	//删除缓存中数据，然后发送kafka消息
-	Rctx := context.Background()
-	rdb, err := tredis.GetRedis(9)
+func (comm *CommentServiceImpl) DelComment(UserId, CommId int64) {
+	var Rctx = context.Background()
+	rdb, err := tredis.CommR.GetCommRedis()
 	if err != nil {
-		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Error("redis连接错误")
-		return err
+		utils.LogDB(comm.C, errno.Service)
 	}
-	exi1, _ := rdb.Exists(Rctx, VideoIdStr).Result()
-	if exi1 > 0 {
-		rdb.ZRem(Rctx, VideoIdStr, CommId)
+	//判断是否有权限删除
+	err = tredis.LoadIfNotExists(CommId, rdb, tredis.LoadCommToRedis)
+	if err != nil {
+		utils.LogBizErr(comm.C, errno.Update, http.StatusOK, "获取评论失败")
 	}
-	exi2, _ := rdb.Exists(Rctx, CommIdStr).Result()
-	if exi2 > 0 {
-		rdb.Del(Rctx, CommIdStr)
+	Info := model.CommInfo{}
+	_ = rdb.HGetAll(Rctx, strconv.FormatInt(CommId, 10)).Scan(&Info)
+	if Info.UserId != UserId {
+		utils.LogBizErr(comm.C, errno.CommentActionErr, http.StatusOK, "没有删除权限")
 	}
-	back := func(string1 string, string2 string) {
-		rdb.Del(Rctx, VideoIdStr)
-		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":kafka写入失败"))
-		utils.LogWithRequestId("Comment", comm.C).Error("kafka写入失败")
-	}
-	kafka.CommonMq.WriteMsg("Del", CommIdStr, back)
-	return nil
+	kafka.CommonMq.WriteMsg("Del", strconv.FormatInt(CommId, 10), func(key string, value string) {
+		utils.LogBizErr(comm.C, errno.CommentActionErr, http.StatusOK, "kafka写入失败")
+	})
 }
 
 // 获取评论列表
-func (comm *CommentServiceImpl) GetCommentList(videoId int64) ([]*model.Comment, error) {
-	videoIdStr := strconv.FormatInt(videoId, 10)
-	userS := UserServiceImpl{C: comm.C}
+func (comm *CommentServiceImpl) GetCommentList(videoId int64) []*model.Comment {
+	var wg sync.WaitGroup
+	//判断视频是否存在
+	UserS := &UserServiceImpl{ctx: comm.C}
+	VideoS := &VideoServiceImpl{C: comm.C}
+	if _, err := VideoS.GetVideoById(videoId, comm.C.GetInt64(constant.UserId)); err != nil {
+		utils.LogBizErr(comm.C, errno.VideoIsNotExistErr, http.StatusOK, "视频不存在")
+		return nil
+	}
 	var Rctx = context.Background()
-	rdb, err := tredis.GetRedis(8)
-	//建立redis连接
-	defer rdb.Close()
+	rdb, err := tredis.CommR.GetCommRedis()
 	if err != nil {
-		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("redis连接错误")
-		return nil, err
+		utils.LogDB(comm.C, errno.Service)
+		return nil
 	}
-	exists, err := rdb.Exists(Rctx, videoIdStr).Result()
+	err = tredis.LoadIfNotExists(videoId, rdb, tredis.LoadCommsToRedis)
 	if err != nil {
-		comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr.AppendMsg(":RedisErr"))
-		utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("redis连接错误")
-		return nil, err
+		utils.LogBizErr(comm.C, errno.Update, http.StatusOK, "将评论列表加载失败")
+		return nil
 	}
-	wg := sync.WaitGroup{}
-	if exists < 1 {
-		//缓存中不存在,查询数据库更新缓存
-		comms, err := dao.GetCommList(videoId)
-		if err != nil {
-			comm.C.AbortWithStatusJSON(http.StatusInternalServerError, errno.ServiceErr)
-			utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Debug("数据库连接错误")
-			return nil, err
-		}
-		go func(wg *sync.WaitGroup) {
-			wg.Add(1)
-			defer wg.Done()
-			err := LoadCommIdsToRedis(videoId, comms, rdb, Rctx)
-			if err != nil {
-				utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("缓存载入失败")
-			}
-		}(&wg)
-		for i, val := range comms {
-			wg.Add(1)
-			go func(i int, v *model.Comment) {
-				comms[i].User = userS.GetUserByUserId(comms[i].UserId)
-				wg.Done()
-			}(i, val)
-		}
-		wg.Wait()
-		return comms, nil
-	} else {
-		//缓存中存在
-		//按照时间戳逆序获取评论id
-		commIds, err := rdb.ZRevRangeWithScores(Rctx, videoIdStr, 0, -1).Result()
-		if err != nil {
-			//降级
-			utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("从缓存中获取评论失败")
-			return dao.GetCommList(videoId)
-		}
-		//组装评论
-		commList := make([]*model.Comment, len(commIds))
-		for i, val := range commIds {
-			go func(n int, v redis.Z) {
+	//按照时间戳逆序获取评论id
+	var commList []*model.Comment
+	commIds, err := rdb.ZRevRangeWithScores(Rctx, strconv.FormatInt(videoId, 10), 0, -1).Result()
+	if err != nil {
+		//降级,从mysql中查询
+		utils.LogWithRequestId(comm.C, "comment", err).Warn("从缓存中获取评论失败")
+		commList, err = dao.GetCommList(videoId)
+		for _, val := range commList {
+			go func(comment *model.Comment) {
 				wg.Add(1)
 				defer wg.Done()
-				commList[n].Id, _ = strconv.ParseInt(v.Member.(string), 10, 64)
-				commList[n].CreatedAt = int64(v.Score)
-				var Info CommInfo
-				err := rdb.HGetAll(Rctx, v.Member.(string)).Scan(&Info)
-				if err != nil {
-					utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("从缓存中获取评论失败")
-					//获取失败，降级从数据库中获取
-					commList[n], err = dao.Comm(commList[n].Id)
-					if err != nil {
-						utils.LogWithRequestId("Comment", comm.C).WithField("err:", err.Error()).Warn("缓存获取失败后从数据库获取评论失败")
-					}
-				}
-			}(i, val)
+				comment.User = UserS.GetUserByUserId(comment.UserId)
+			}(val)
 		}
 		wg.Wait()
-		return commList, nil
+		return commList
 	}
+	//组装评论
+	commList = make([]*model.Comment, len(commIds))
+	for i, val := range commIds {
+		go func(n int, v redis.Z) {
+			wg.Add(1)
+			defer wg.Done()
+			commList[n].Id, _ = strconv.ParseInt(v.Member.(string), 10, 64)
+			commList[n].CreatedAt = int64(v.Score)
+			var Info model.CommInfo
+			err := rdb.HGetAll(Rctx, v.Member.(string)).Scan(&Info)
+			if err != nil {
+				utils.LogWithRequestId(comm.C, "comment", err).Debug("从缓存中获取失败")
+				//获取失败，降级从数据库中获取
+				commList[n], err = dao.Comm(commList[n].Id)
+				if err != nil {
+					utils.LogWithRequestId(comm.C, "comment", err).Error("从mysql中获取评论失败")
+				}
+				commList[n].User = UserS.GetUserByUserId(commList[n].UserId)
+			}
+			commList[n].Content = Info.Content
+			commList[n].User = UserS.GetUserByUserId(Info.UserId)
+		}(i, val)
+	}
+	wg.Wait()
+	return commList
 }
 
 // 根据视频id获取评论数量
@@ -179,49 +157,4 @@ func (comm *CommentServiceImpl) GetCommCountFromVId(id int64) (int64, error) {
 		return 0, err
 	}
 	return count, nil
-}
-
-// 从数据库中将指定评论内容加载到redis中
-func LoadCommToRedis(rdb redis.Client, Rctx context.Context, commId int64) error {
-	comm, err := dao.Comm(commId)
-	if err != nil {
-		return err
-	}
-	err = rdb.HMSet(Rctx, strconv.FormatInt(comm.Id, 10), CommInfo{
-		UserId:  comm.UserId,
-		Content: comm.Content,
-	}, constant.Comment_CommId_DefaultTime).Err()
-	return err
-}
-
-type CommInfo struct {
-	UserId  int64  `redis:"userid"`
-	Content string `redis:"content"`
-}
-
-// 将视频的评论加载到redis中
-func LoadCommIdsToRedis(VideoId int64, CommIds []*model.Comment, rdb *redis.Client, Rctx context.Context) error {
-	VideoIdStr := strconv.FormatInt(VideoId, 10)
-	var zs []redis.Z
-	for _, val := range CommIds {
-		zs = append(zs, redis.Z{Score: float64(val.CreatedAt), Member: val.Id})
-		rdb.HMSet(Rctx, strconv.FormatInt(val.Id, 10), CommInfo{
-			UserId:  val.UserId,
-			Content: val.Content,
-		}, constant.Comment_CommId_DefaultTime)
-	}
-	zs = append(zs, redis.Z{
-		Score:  -1,
-		Member: -1,
-	})
-	err := rdb.ZAdd(Rctx, VideoIdStr, zs...).Err()
-	if err != nil {
-		return err
-	}
-	//设置过期时间，默认3天
-	err = rdb.Expire(Rctx, VideoIdStr, constant.Favorite_UserId_DefaultTime).Err()
-	if err != nil {
-		return err
-	}
-	return nil
 }

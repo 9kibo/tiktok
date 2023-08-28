@@ -27,13 +27,13 @@ func CommAction(c *gin.Context) {
 	}
 	Comm := &service.CommentServiceImpl{C: c}
 	if req.Action == 1 {
-		CommResp, err = Comm.AddComment(req.UserId, req.VideoId, req.Text)
-		if err != nil || c.IsAborted() {
+		CommResp = Comm.AddComment(req.UserId, req.VideoId, req.Text)
+		if c.IsAborted() {
 			return
 		}
 	} else {
-		err = Comm.DelComment(req.VideoId, req.DelCommId)
-		if err != nil || c.IsAborted() {
+		Comm.DelComment(req.VideoId, req.DelCommId)
+		if c.IsAborted() {
 			return
 		}
 	}
@@ -51,8 +51,8 @@ func CommList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.BuildBindResp(err))
 	}
 	Comm := &service.CommentServiceImpl{C: c}
-	commentList, err := Comm.GetCommentList(req.VideoId)
-	if err != nil || c.IsAborted() {
+	commentList := Comm.GetCommentList(req.VideoId)
+	if c.IsAborted() {
 		return
 	}
 	c.JSON(http.StatusOK, CommentListResp{

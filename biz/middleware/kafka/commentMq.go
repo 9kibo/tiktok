@@ -42,7 +42,7 @@ func ConsumeComm(tKafka *TKafka) {
 			}
 		}
 		Rctx := context.Background()
-		rdb, err := redis.GetRedis(9)
+		rdb, err := redis.CommR.GetCommRedis()
 		if err != nil {
 			logrus.WithField("redisErr:", err).Warn("redis连接失败")
 		}

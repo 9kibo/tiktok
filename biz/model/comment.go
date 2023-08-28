@@ -16,6 +16,10 @@ type CommToJson struct {
 	VideoId  int64
 	Content  string
 }
+type CommInfo struct {
+	UserId  int64  `redis:"userid"`
+	Content string `redis:"content"`
+}
 
 type CommReq struct {
 	UserId    int64
@@ -27,4 +31,11 @@ type CommReq struct {
 type CommentsReq struct {
 	UserId  int64
 	VideoId int64 `form:"video_id" binging:"gt=0"`
+}
+
+var ErrComm = Comment{
+	Id:        0,
+	CreatedAt: 0,
+	Content:   "错误信息",
+	User:      nil,
 }
