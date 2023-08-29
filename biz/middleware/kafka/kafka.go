@@ -2,10 +2,11 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"github.com/segmentio/kafka-go"
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"tiktok/biz/config"
+	"tiktok/pkg/utils"
 	"time"
 	"unsafe"
 )
@@ -19,17 +20,20 @@ type TKafka struct {
 
 func Init() {
 	FavoriteMq = GetKafka("favorite", "favoriteAlter")
+	CommonMq = GetKafka("common", "commonAlter")
 
 	// go 启动消费协程
-	go FavConsumer(FavoriteMq)
+	go ConsumeFavorite(FavoriteMq)
+	go ConsumeComm(CommonMq)
 }
 func GetKafka(Topic string, Group string) *TKafka {
 	w := &kafka.Writer{
 		Addr:                   kafka.TCP(config.C.Kafka.Addr),
 		Topic:                  Topic,
 		Balancer:               &kafka.Hash{},
-		WriteTimeout:           1 * time.Second,
+		WriteTimeout:           5 * time.Second,
 		RequiredAcks:           kafka.RequireNone,
+		BatchTimeout:           50 * time.Millisecond,
 		AllowAutoTopicCreation: true,
 	}
 	r := kafka.NewReader(kafka.ReaderConfig{
@@ -56,7 +60,10 @@ func (T *TKafka) WriteMsg(key string, value string, back func(string, string)) {
 				continue
 			} else {
 				back(key, value)
-				fmt.Printf("kafka写失败Topic:%s,key:%s,value:%s", T.Topic, key, value)
+				utils.Log("Kafka").WithFields(logrus.Fields{
+					"key":   key,
+					"value": value,
+				}).Error("kafka写入失败")
 			}
 		} else {
 			break

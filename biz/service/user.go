@@ -85,36 +85,48 @@ func (s UserServiceImpl) GetUserByUserId(userId int64) *model.User {
 		utils.LogDB(s.ctx, err)
 		return nil
 	}
-	followRedisService := redis.NewFollowService(s.ctx)
-	var ok bool
-	if user.FollowingCount, ok = followRedisService.GetFollowingCount(userId); !ok {
+	redisFollowService := redis.NewFollowService(s.ctx)
+	if user.FollowingCount, err = redisFollowService.GetFollowingCount(userId); err != nil {
+		redis.HandlerErr(s.ctx, err)
+		return nil
+	} else if user.FollowingCount == 0 {
 		user.FollowingCount, err = dao.GetFollowingCount(userId)
 		if err != nil {
 			utils.LogDB(s.ctx, err)
 			return nil
 		}
 	}
-	if user.FollowerCount, ok = followRedisService.GetFollowerCount(userId); !ok {
+	if user.FollowerCount, err = redisFollowService.GetFollowerCount(userId); err != nil {
+		redis.HandlerErr(s.ctx, err)
+		return nil
+	} else if user.FollowerCount == 0 {
 		user.FollowerCount, err = dao.GetFollowerCount(userId)
 		if err != nil {
 			utils.LogDB(s.ctx, err)
 			return nil
 		}
 	}
-	var isFollow bool
-	userIdS, _ := s.ctx.Get(constant.UserId)
-	loginUserId := userIdS.(int64)
-	if isFollow, ok = followRedisService.ExistsFollow(loginUserId, userId); !ok {
-		isFollow, err = dao.ExistsFollow(&model.Follow{
-			FollowerId: loginUserId,
-			FolloweeId: userId,
-		})
-		if err != nil {
-			utils.LogDB(s.ctx, err)
+	//not user self, or no login is all false
+	userIdFromToken, ok := s.ctx.Get(constant.UserId)
+	if ok && userIdFromToken != userId {
+		var isFollow bool
+		userIdS, _ := s.ctx.Get(constant.UserId)
+		loginUserId := userIdS.(int64)
+		if isFollow, err = redisFollowService.ExistsFollow(loginUserId, userId); err != nil {
+			redis.HandlerErr(s.ctx, err)
 			return nil
+		} else if !isFollow {
+			isFollow, err = dao.ExistsFollow(&model.Follow{
+				FollowerId: loginUserId,
+				FolloweeId: userId,
+			})
+			if err != nil {
+				utils.LogDB(s.ctx, err)
+				return nil
+			}
 		}
+		user.IsFollow = isFollow
 	}
-	user.IsFollow = isFollow
 
 	//if user.FavoriteCount, ok = followRedisService.GetFollowerCount(userId); !ok {
 	//	user.FavoriteCount, err = dao.GetFollowingCount(userId)

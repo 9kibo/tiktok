@@ -73,3 +73,26 @@ func cmdsString(cmds []redis.Cmder) string {
 func getIntKey(prefix string, userId int64) string {
 	return prefix + strconv.FormatInt(userId, 10)
 }
+
+// LoadIfNotExists 将指定key加载到redis中
+func LoadIfNotExists(key int64, rdb *redis.Client, LoadFunc func(key int64, rdb *redis.Client) error) error {
+	exists, err := rdb.Exists(Ctx, strconv.FormatInt(key, 10)).Result()
+	if err != nil {
+		return err
+	}
+	//缓存不存在
+	if exists == 0 {
+		ok, err := FavMutex.Put(key)
+		if err != nil {
+			return err
+		}
+		if ok {
+			err = LoadFunc(key, rdb)
+			FavMutex.Del(key)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
