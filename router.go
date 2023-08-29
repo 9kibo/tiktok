@@ -33,6 +33,9 @@ func initRouter(e *gin.Engine) {
 		withLoginRoute.GET("relation/follow/list/", handler.GetFollowingList)
 		withLoginRoute.GET("relation/follower/list/", handler.GetFollowersList)
 		withLoginRoute.GET("relation/friend/list/", handler.GetFriendList)
+		//message
+		withLoginRoute.POST("message/action/", handler.MessageAction)
+		withLoginRoute.GET("message/chat/", handler.MessageChatRecord)
 	}
 }
 func WithJwtAuth() gin.HandlerFunc {

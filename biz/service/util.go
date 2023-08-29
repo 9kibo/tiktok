@@ -8,7 +8,7 @@ import (
 	"tiktok/pkg/utils"
 )
 
-// isTokenUser userId是否和token中的一样
+// isTokenUser userId是否和token中的一样, 不一样会自动响应
 func isTokenUser(ctx *gin.Context, userId int64) bool {
 	//检查是否和token中的一样
 	uid := ctx.MustGet(constant.UserId).(int64)

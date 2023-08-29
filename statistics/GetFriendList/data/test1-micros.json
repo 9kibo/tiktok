@@ -1,0 +1,272 @@
+[
+  {
+    "X": 1,
+    "one2AllAndAllMessage": 35317,
+    "one2AllAndAllMessageConcurrent": 30580,
+    "one2AllAndAssociationSubQuery": 466164,
+    "one2AllAndAssociationSubQueryConcurrent": 402722,
+    "oneTOne": 123302,
+    "oneTOneConcurrent": 154150
+  },
+  {
+    "X": 2,
+    "one2AllAndAllMessage": 44463,
+    "one2AllAndAllMessageConcurrent": 49112,
+    "one2AllAndAssociationSubQuery": 468270,
+    "one2AllAndAssociationSubQueryConcurrent": 467210,
+    "oneTOne": 133632,
+    "oneTOneConcurrent": 154818
+  },
+  {
+    "X": 3,
+    "one2AllAndAllMessage": 54255,
+    "one2AllAndAllMessageConcurrent": 56604,
+    "one2AllAndAssociationSubQuery": 688751,
+    "one2AllAndAssociationSubQueryConcurrent": 534592,
+    "oneTOne": 146149,
+    "oneTOneConcurrent": 155603
+  },
+  {
+    "X": 4,
+    "one2AllAndAllMessage": 57328,
+    "one2AllAndAllMessageConcurrent": 59087,
+    "one2AllAndAssociationSubQuery": 690158,
+    "one2AllAndAssociationSubQueryConcurrent": 680315,
+    "oneTOne": 146149,
+    "oneTOneConcurrent": 155603
+  },
+  {
+    "X": 5,
+    "one2AllAndAllMessage": 80501,
+    "one2AllAndAllMessageConcurrent": 61963,
+    "one2AllAndAssociationSubQuery": 725381,
+    "one2AllAndAssociationSubQueryConcurrent": 692312,
+    "oneTOne": 146647,
+    "oneTOneConcurrent": 156115
+  },
+  {
+    "X": 6,
+    "one2AllAndAllMessage": 81497,
+    "one2AllAndAllMessageConcurrent": 62477,
+    "one2AllAndAssociationSubQuery": 831158,
+    "one2AllAndAssociationSubQueryConcurrent": 693312,
+    "oneTOne": 149672,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 7,
+    "one2AllAndAllMessage": 88578,
+    "one2AllAndAllMessageConcurrent": 62814,
+    "one2AllAndAssociationSubQuery": 858843,
+    "one2AllAndAssociationSubQueryConcurrent": 768690,
+    "oneTOne": 153722,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 8,
+    "one2AllAndAllMessage": 96358,
+    "one2AllAndAllMessageConcurrent": 70123,
+    "one2AllAndAssociationSubQuery": 860463,
+    "one2AllAndAssociationSubQueryConcurrent": 896047,
+    "oneTOne": 161266,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 9,
+    "one2AllAndAllMessage": 105357,
+    "one2AllAndAllMessageConcurrent": 74891,
+    "one2AllAndAssociationSubQuery": 888416,
+    "one2AllAndAssociationSubQueryConcurrent": 935430,
+    "oneTOne": 171381,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 10,
+    "one2AllAndAllMessage": 107809,
+    "one2AllAndAllMessageConcurrent": 77418,
+    "one2AllAndAssociationSubQuery": 899309,
+    "one2AllAndAssociationSubQueryConcurrent": 936936,
+    "oneTOne": 176453,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 11,
+    "one2AllAndAllMessage": 108840,
+    "one2AllAndAllMessageConcurrent": 79414,
+    "one2AllAndAssociationSubQuery": 910975,
+    "one2AllAndAssociationSubQueryConcurrent": 964342,
+    "oneTOne": 183998,
+    "oneTOneConcurrent": 156654
+  },
+  {
+    "X": 12,
+    "one2AllAndAllMessage": 110846,
+    "one2AllAndAllMessageConcurrent": 81429,
+    "one2AllAndAssociationSubQuery": 946972,
+    "one2AllAndAssociationSubQueryConcurrent": 1022180,
+    "oneTOne": 187185,
+    "oneTOneConcurrent": 156770
+  },
+  {
+    "X": 13,
+    "one2AllAndAllMessage": 110846,
+    "one2AllAndAllMessageConcurrent": 83934,
+    "one2AllAndAssociationSubQuery": 1047287,
+    "one2AllAndAssociationSubQueryConcurrent": 1040545,
+    "oneTOne": 187693,
+    "oneTOneConcurrent": 157266
+  },
+  {
+    "X": 14,
+    "one2AllAndAllMessage": 111849,
+    "one2AllAndAllMessageConcurrent": 83934,
+    "one2AllAndAssociationSubQuery": 1077627,
+    "one2AllAndAssociationSubQueryConcurrent": 1076717,
+    "oneTOne": 187695,
+    "oneTOneConcurrent": 157266
+  },
+  {
+    "X": 15,
+    "one2AllAndAllMessage": 119762,
+    "one2AllAndAllMessageConcurrent": 85816,
+    "one2AllAndAssociationSubQuery": 1114527,
+    "one2AllAndAssociationSubQueryConcurrent": 1077257,
+    "oneTOne": 188202,
+    "oneTOneConcurrent": 157266
+  },
+  {
+    "X": 16,
+    "one2AllAndAllMessage": 122284,
+    "one2AllAndAllMessageConcurrent": 89323,
+    "one2AllAndAssociationSubQuery": 1117573,
+    "one2AllAndAssociationSubQueryConcurrent": 1181763,
+    "oneTOne": 188998,
+    "oneTOneConcurrent": 157266
+  },
+  {
+    "X": 17,
+    "one2AllAndAllMessage": 122472,
+    "one2AllAndAllMessageConcurrent": 91337,
+    "one2AllAndAssociationSubQuery": 1155861,
+    "one2AllAndAssociationSubQueryConcurrent": 1182303,
+    "oneTOne": 189597,
+    "oneTOneConcurrent": 157565
+  },
+  {
+    "X": 18,
+    "one2AllAndAllMessage": 122472,
+    "one2AllAndAllMessageConcurrent": 93374,
+    "one2AllAndAssociationSubQuery": 1196407,
+    "one2AllAndAssociationSubQueryConcurrent": 1214793,
+    "oneTOne": 190687,
+    "oneTOneConcurrent": 157589
+  },
+  {
+    "X": 19,
+    "one2AllAndAllMessage": 123015,
+    "one2AllAndAllMessageConcurrent": 93374,
+    "one2AllAndAssociationSubQuery": 1240195,
+    "one2AllAndAssociationSubQueryConcurrent": 1236884,
+    "oneTOne": 192752,
+    "oneTOneConcurrent": 157679
+  },
+  {
+    "X": 20,
+    "one2AllAndAllMessage": 124285,
+    "one2AllAndAllMessageConcurrent": 97069,
+    "one2AllAndAssociationSubQuery": 1279698,
+    "one2AllAndAssociationSubQueryConcurrent": 1244416,
+    "oneTOne": 195792,
+    "oneTOneConcurrent": 158097
+  },
+  {
+    "X": 21,
+    "one2AllAndAllMessage": 129527,
+    "one2AllAndAllMessageConcurrent": 97577,
+    "one2AllAndAssociationSubQuery": 1307345,
+    "one2AllAndAssociationSubQueryConcurrent": 1320133,
+    "oneTOne": 199460,
+    "oneTOneConcurrent": 158097
+  },
+  {
+    "X": 22,
+    "one2AllAndAllMessage": 131050,
+    "one2AllAndAllMessageConcurrent": 97577,
+    "one2AllAndAssociationSubQuery": 1307345,
+    "one2AllAndAssociationSubQueryConcurrent": 1320867,
+    "oneTOne": 199967,
+    "oneTOneConcurrent": 159142
+  },
+  {
+    "X": 23,
+    "one2AllAndAllMessage": 131534,
+    "one2AllAndAllMessageConcurrent": 100075,
+    "one2AllAndAssociationSubQuery": 1357893,
+    "one2AllAndAssociationSubQueryConcurrent": 1321408,
+    "oneTOne": 200462,
+    "oneTOneConcurrent": 160075
+  },
+  {
+    "X": 24,
+    "one2AllAndAllMessage": 133632,
+    "one2AllAndAllMessageConcurrent": 101084,
+    "one2AllAndAssociationSubQuery": 1358421,
+    "one2AllAndAssociationSubQueryConcurrent": 1375403,
+    "oneTOne": 202798,
+    "oneTOneConcurrent": 160075
+  },
+  {
+    "X": 25,
+    "one2AllAndAllMessage": 141189,
+    "one2AllAndAllMessageConcurrent": 102093,
+    "one2AllAndAssociationSubQuery": 1363587,
+    "one2AllAndAssociationSubQueryConcurrent": 1377851,
+    "oneTOne": 203307,
+    "oneTOneConcurrent": 160075
+  },
+  {
+    "X": 26,
+    "one2AllAndAllMessage": 141296,
+    "one2AllAndAllMessageConcurrent": 103007,
+    "one2AllAndAssociationSubQuery": 1369669,
+    "one2AllAndAssociationSubQueryConcurrent": 1386122,
+    "oneTOne": 203312,
+    "oneTOneConcurrent": 160126
+  },
+  {
+    "X": 27,
+    "one2AllAndAllMessage": 142810,
+    "one2AllAndAllMessageConcurrent": 103593,
+    "one2AllAndAssociationSubQuery": 1374157,
+    "one2AllAndAssociationSubQueryConcurrent": 1405685,
+    "oneTOne": 205458,
+    "oneTOneConcurrent": 160549
+  },
+  {
+    "X": 28,
+    "one2AllAndAllMessage": 143152,
+    "one2AllAndAllMessageConcurrent": 104041,
+    "one2AllAndAssociationSubQuery": 1434377,
+    "one2AllAndAssociationSubQueryConcurrent": 1405707,
+    "oneTOne": 205458,
+    "oneTOneConcurrent": 160614
+  },
+  {
+    "X": 29,
+    "one2AllAndAllMessage": 145613,
+    "one2AllAndAllMessageConcurrent": 104564,
+    "one2AllAndAssociationSubQuery": 1450159,
+    "one2AllAndAssociationSubQueryConcurrent": 1419270,
+    "oneTOne": 207517,
+    "oneTOneConcurrent": 160614
+  },
+  {
+    "X": 30,
+    "one2AllAndAllMessage": 146694,
+    "one2AllAndAllMessageConcurrent": 106103,
+    "one2AllAndAssociationSubQuery": 1454826,
+    "one2AllAndAssociationSubQueryConcurrent": 1437606,
+    "oneTOne": 207517,
+    "oneTOneConcurrent": 161142
+  }
+]

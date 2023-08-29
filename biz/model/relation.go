@@ -22,7 +22,7 @@ func (t FollowActionReq) GetFollow() *Follow {
 }
 
 type FriendUser struct {
-	User
+	*User
 	// 和该好友的最新聊天消息
 	Message string `json:"message"`
 	// message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息

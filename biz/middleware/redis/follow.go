@@ -1,23 +1,19 @@
 // Package redis
 // get:
 // add: need check success size, but set no for maybe exists element
-// delete:  ignore if exists,  no err as success delete
+// delete:  ignore if exists,  no Err as success delete
 package redis
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"strconv"
-	"tiktok/pkg/constant"
 	"tiktok/pkg/utils"
-	"time"
 )
 
 const (
 	follower  = "follower:"
 	following = "following:"
-	expireS   = 60 * 60 * time.Second
 )
 
 type FollowService struct {
@@ -34,65 +30,56 @@ func NewFollowService(ctx *gin.Context) *FollowService {
 func (s *FollowService) getKey(prefix string, userId int64) string {
 	return prefix + strconv.FormatInt(userId, 10)
 }
-func (s *FollowService) AddFollowingIds(userId int64, followingIds []int64) bool {
-	return s.addFollowIds(following, userId, followingIds)
+func (s *FollowService) AddFollowingIds(userId int64, followingIds []int64) error {
+	return sAdd(s.client, s.ctx, getIntKey(following, userId), expireS, utils.I2I(followingIds))
 }
-func (s *FollowService) AddFollowerIds(userId int64, followerIds []int64) bool {
-	return s.addFollowIds(follower, userId, followerIds)
-}
-func (s *FollowService) addFollowIds(keyPrefix string, userId int64, followingIds []int64) bool {
-	//err is Pipe func return's err or request err
-	cmds, err := s.client.TxPipelined(context.Background(), func(p redis.Pipeliner) error {
-		key := s.getKey(keyPrefix, userId)
-		size := len(followingIds)
-		followingIds0 := make([]any, 0, size)
-		for _, id := range followingIds {
-			followingIds0 = append(followingIds0, id)
-		}
-		sAdd := p.SAdd(context.Background(), key, followingIds0...)
-		if sAdd.Err() != nil {
-			handlerErr(sAdd, s.ctx)
-			return nil
-		}
-		expire := p.Expire(context.Background(), key, expireS)
-		if expire.Err() != nil {
-			handlerErr(sAdd, s.ctx)
-			return nil
-		}
-		return nil
-	})
-	if err != nil {
-		utils.LogWithRequestId(s.ctx, constant.LMRedis, err).Debug("cmd=%s", cmdsString(cmds))
-		return false
-	}
-	return true
+func (s *FollowService) AddFollowerIds(userId int64, followerIds []int64) error {
+	return sAdd(s.client, s.ctx, getIntKey(follower, userId), expireS, utils.I2I(followerIds))
 }
 
-func (s *FollowService) DeleteFollowingIds(userId int64) bool {
-	return !handlerErr(s.client.SRem(context.Background(), s.getKey(following, userId)), s.ctx)
+func (s *FollowService) DeleteFollowingIds(userId int64, ids []int64) error {
+	var remCmd *redis.IntCmd
+	if ids == nil {
+		remCmd = s.client.SRem(s.ctx, getIntKey(following, userId))
+	} else {
+		remCmd = s.client.SRem(s.ctx, getIntKey(following, userId), utils.I2I(ids))
+	}
+	if remCmd.Err() != nil {
+		return newErr(remCmd, "SRem")
+	}
+	return nil
 }
-func (s *FollowService) DeleteFollowerIds(userId int64) bool {
-	return !handlerErr(s.client.SRem(context.Background(), s.getKey(follower, userId)), s.ctx)
+func (s *FollowService) DeleteFollowerIds(userId int64, ids []int64) error {
+	var remCmd *redis.IntCmd
+	if ids == nil {
+		remCmd = s.client.SRem(s.ctx, getIntKey(follower, userId))
+	} else {
+		remCmd = s.client.SRem(s.ctx, getIntKey(follower, userId), utils.I2I(ids))
+	}
+	if remCmd.Err() != nil {
+		return newErr(remCmd, "SRem")
+	}
+	return nil
 }
 
 // GetFollowingIds 获取关注的人
-func (s *FollowService) GetFollowingIds(userId int64) ([]int64, bool) {
-	return sGetInt(s.client, s.ctx, s.getKey(following, userId))
+func (s *FollowService) GetFollowingIds(userId int64) ([]int64, error) {
+	return sGetInts(s.client, s.ctx, getIntKey(following, userId))
 }
 
 // GetFollowerIds 获取粉丝
-func (s *FollowService) GetFollowerIds(userId int64) ([]int64, bool) {
-	return sGetInt(s.client, s.ctx, s.getKey(follower, userId))
+func (s *FollowService) GetFollowerIds(userId int64) ([]int64, error) {
+	return sGetInts(s.client, s.ctx, getIntKey(follower, userId))
 }
 
-func (s *FollowService) GetFollowingCount(userId int64) (int64, bool) {
-	return scard(s.client, s.ctx, s.getKey(following, userId))
+func (s *FollowService) GetFollowingCount(userId int64) (int64, error) {
+	return scard(s.client, s.ctx, getIntKey(following, userId))
 }
 
-func (s *FollowService) GetFollowerCount(userId int64) (int64, bool) {
-	return scard(s.client, s.ctx, s.getKey(follower, userId))
+func (s *FollowService) GetFollowerCount(userId int64) (int64, error) {
+	return scard(s.client, s.ctx, getIntKey(follower, userId))
 }
 
-func (s *FollowService) ExistsFollow(followerId int64, followeeId int64) (bool, bool) {
+func (s *FollowService) ExistsFollow(followerId int64, followeeId int64) (bool, error) {
 	return sisMember(s.client, s.ctx, following+strconv.FormatInt(followerId, 10), followeeId)
 }

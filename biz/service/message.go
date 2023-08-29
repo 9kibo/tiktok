@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"tiktok/biz/dao"
+	"tiktok/biz/middleware/redis"
 	"tiktok/biz/model"
 	"tiktok/pkg/constant"
 	"tiktok/pkg/errno"
@@ -33,6 +34,12 @@ func (s *MessageServiceImpl) MessageAction(req *model.MessageActionReq) {
 	})
 	if err != nil {
 		utils.LogDB(s.ctx, err)
+		return
+	}
+
+	//delete redis
+	if err = redis.NewMessageService(s.ctx).DeleteFriendIds(userId); err != nil {
+		redis.HandlerErr(s.ctx, err)
 		return
 	}
 }

@@ -26,3 +26,8 @@ func TestMustGetMessageListByLastTime(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, len(messageList) == 2)
 }
+func TestGetFriendIds(t *testing.T) {
+	friendIds, err := GetFriendIds(1)
+	assert.NoError(t, err)
+	assert.True(t, len(friendIds) == 10000)
+}

@@ -5,10 +5,8 @@
 package handler
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"tiktok/biz/model"
 	"tiktok/biz/service"
 	"tiktok/pkg/errno"
@@ -17,12 +15,11 @@ import (
 
 // RelationAction
 //
-// @Router /douyin/relation/action [post]
+// @Router /douyin/relation/action/ [post]
 // @Summary 关注操作
 // @Schemes http
 // @Description 关注或者取消关注用户
 // @Tags Relation
-// @Accept       json
 // @Produce      json
 // @Param user_id query int64 true "关注者"
 // @Param to_user_id query int64 true "被关注者"
@@ -50,7 +47,7 @@ func RelationAction(ctx *gin.Context) {
 	respOfUpdate(ctx)
 }
 
-// FollowListResp 关注/粉丝/好友列表
+// FollowListResp 关注/粉丝列表
 type FollowListResp struct {
 	errno.Errno
 	//用户列表
@@ -59,10 +56,9 @@ type FollowListResp struct {
 
 // GetFollowingList
 //
-// @Router /douyin/relation/follow/list [get]
+// @Router /douyin/relation/follow/list/ [get]
 // @Summary 关注列表
 // @Tags Relation
-// @Accept json
 // @Produce json
 // @Param user_id query int64 true "用户"
 // @Success      200
@@ -84,24 +80,11 @@ func GetFollowingList(ctx *gin.Context) {
 	})
 }
 
-func getUserId(ctx *gin.Context) (int64, error) {
-	userIdS, ok := ctx.GetQuery("user_id")
-	if !ok {
-		return 0, errors.New("has not userId")
-	}
-	userId, err := strconv.ParseInt(userIdS, 10, 64)
-	if err != nil {
-		return 0, errors.New("userId has err format")
-	}
-	return userId, nil
-}
-
 // GetFollowersList
 //
-// @Router /douyin/relation/follower/list [get]
+// @Router /douyin/relation/follower/list/ [get]
 // @Summary 粉丝列表
 // @Tags Relation
-// @Accept json
 // @Produce json
 // @Param user_id query int64 true  "用户"
 // @Success      200
@@ -121,18 +104,4 @@ func GetFollowersList(ctx *gin.Context) {
 		Errno:    errno.Success,
 		UserList: followingList,
 	})
-}
-
-// GetFriendList
-//
-// @Router /douyin/relation/friend/list [get]
-// @Summary 好友列表
-// @Description 登录用户在消息页展示已关注的用户列表
-// @Tags Message
-// @Accept json
-// @Produce json
-// @Param user_id query int64 true  "用户"
-// @Success      200
-func GetFriendList(c *gin.Context) {
-
 }

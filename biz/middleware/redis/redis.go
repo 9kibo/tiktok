@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/redis/go-redis/v9"
 	"tiktok/biz/config"
+	"time"
 )
 
 var Ctx = context.Background()
@@ -15,12 +16,19 @@ var Ctx = context.Background()
 社交模块使用 db 12，13，14，15
 */
 var (
-	followClient *redis.Client
+	expireS       = 60 * 60 * time.Second
+	followClient  *redis.Client
+	messageClient *redis.Client
 )
 
 func Init() {
 	var err error
 	followClient, err = GetRedis(12)
+	if err != nil {
+		panic(err)
+	}
+
+	messageClient, err = GetRedis(13)
 	if err != nil {
 		panic(err)
 	}

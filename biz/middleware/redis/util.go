@@ -1,56 +1,58 @@
 package redis
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"net/http"
 	"strconv"
 	"strings"
 	"tiktok/pkg/constant"
+	"tiktok/pkg/errno"
 	"tiktok/pkg/utils"
 )
 
-type logRedisData struct {
-	Cmd []*logRedisCmdData `json:"cmd"`
-}
-
-type logRedisCmdData struct {
+type Err struct {
+	Msg string
 	Cmd string
 	Err error
 }
 
-// 返回是否有错误并打印日志
-func handlerErrs(cmds []redis.Cmder, ctx *gin.Context) bool {
-	data := logRedisData{}
-	for _, cmd := range cmds {
-		if cmd.Err() != nil {
-			data.Cmd = append(data.Cmd, &logRedisCmdData{
-				Cmd: cmd.String(),
-				Err: cmd.Err(),
-			})
-		}
-	}
-	if len(data.Cmd) == 0 {
-		return false
-	}
-
-	utils.LogWithRID(constant.LMRedis, &data, ctx).Debug("multi cmd err")
-	return true
+func (e Err) Error() string {
+	return fmt.Sprintf("Msg=%s, Cmd=%s, redisErr=%s", e.Msg, e.Cmd, e.Err)
 }
 
-// 返回是否有错误并打印日志
-func handlerErr(cmd redis.Cmder, ctx *gin.Context) bool {
-	if cmd.Err() != nil {
-		utils.LogWithRID(constant.LMRedis, &logRedisData{
-			Cmd: []*logRedisCmdData{
-				{
-					Cmd: cmd.String(),
-					Err: cmd.Err(),
-				},
-			},
-		}, ctx).WithError(cmd.Err()).Debug("cmd err")
-		return true
+type logRedisCmdData struct {
+	Cmd string
+}
+
+func newErr(cmd redis.Cmder, msg string) error {
+	return &Err{
+		Msg: msg,
+		Cmd: cmd.String(),
+		Err: cmd.Err(),
 	}
-	return false
+}
+func newErrCmds(cmd []redis.Cmder, msg string, err error) error {
+	if redisErr, ok := err.(*Err); ok {
+		return &Err{
+			Msg: msg + ", " + redisErr.Msg,
+			Cmd: redisErr.Cmd,
+			Err: redisErr.Err,
+		}
+	}
+	return &Err{
+		Msg: msg,
+		Cmd: cmdsString(cmd),
+		Err: err,
+	}
+}
+
+// HandlerErr 有错误就打印错误
+func HandlerErr(ctx *gin.Context, err error) {
+	redisErr := err.(*Err)
+	utils.LogWithRID(constant.LMRedis, redisErr.Cmd, ctx).WithError(redisErr.Err).Debug(redisErr.Msg)
+	ctx.AbortWithStatusJSON(http.StatusOK, errno.Service)
 }
 
 // 返回是否有错误并打印日志
@@ -66,4 +68,8 @@ func cmdsString(cmds []redis.Cmder) string {
 		}
 	}
 	return sb.String()
+}
+
+func getIntKey(prefix string, userId int64) string {
+	return prefix + strconv.FormatInt(userId, 10)
 }
