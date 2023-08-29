@@ -11,7 +11,7 @@ func NewErrno(code int, msg string) Errno {
 
 // Errno 详细响应码
 type Errno struct {
-	Code int    `json:"status_code,omitempty" example:"1"`
+	Code int    `json:"status_code" example:"1"`
 	Msg  string `json:"status_msg,omitempty" example:"xxxx"`
 }
 

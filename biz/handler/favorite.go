@@ -18,7 +18,7 @@ type FavoriteListResp struct {
 
 func Favorite(c *gin.Context) {
 	req := &model.FavoriteReq{}
-	req.VideoId = c.GetInt64(constant.UserId)
+	req.UserId = c.GetInt64(constant.UserId)
 	if err := c.ShouldBindQuery(req); err != nil {
 		c.JSON(http.StatusBadRequest, model.BuildBindResp(err))
 	}

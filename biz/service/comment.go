@@ -108,7 +108,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) []*model.Comment {
 	}
 	//按照时间戳逆序获取评论id
 	var commList []*model.Comment
-	commIds, err := rdb.ZRevRangeWithScores(Rctx, strconv.FormatInt(videoId, 10), 0, -1).Result()
+	commIds, err := rdb.ZRevRangeWithScores(Rctx, strconv.FormatInt(videoId, 10), 0, -2).Result()
 	if err != nil {
 		//降级,从mysql中查询
 		utils.LogWithRequestId(comm.C, "comment", err).Warn("从缓存中获取评论失败")
@@ -129,6 +129,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) []*model.Comment {
 		go func(n int, v redis.Z) {
 			wg.Add(1)
 			defer wg.Done()
+			commList[n] = &model.Comment{}
 			commList[n].Id, _ = strconv.ParseInt(v.Member.(string), 10, 64)
 			commList[n].CreatedAt = int64(v.Score)
 			var Info model.CommInfo

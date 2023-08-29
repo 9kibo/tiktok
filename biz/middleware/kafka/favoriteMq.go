@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"tiktok/biz/dao"
-	"tiktok/pkg/errno"
 )
 
 var FavoriteMq *TKafka
@@ -27,18 +26,11 @@ func ConsumeFavorite(tKafka *TKafka) {
 			err = dao.AddFavorite(UserId, VideoId, createAt)
 		}
 		if err != nil {
-			if err == errno.FavoriteRelationAlreadyExistErr {
-				logrus.WithFields(logrus.Fields{
-					"UserId":  UserId,
-					"VideoId": VideoId,
-					"Action":  len(value) ^ 3,
-				}).Warn("重复点赞或取消点赞")
-			}
 			logrus.WithFields(logrus.Fields{
 				"UserId":  UserId,
 				"VideoId": VideoId,
 				"Action":  len(value) ^ 3,
-			}).Error("数据写入失败")
+			}).Warn("重复点赞或取消点赞")
 		}
 	}
 }

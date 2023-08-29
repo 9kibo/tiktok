@@ -7,7 +7,7 @@ import (
 // BaseResp 基础响应体
 type BaseResp struct {
 	//业务响应码
-	Code int `json:"status_code,omitempty" example:"1"`
+	Code int `json:"status_code" example:"1"`
 	//业务消息
 	Msg string `json:"status_msg,omitempty" example:"xxxx"`
 }
