@@ -33,7 +33,7 @@ type CommentServiceImpl struct {
 // 添加评论
 func (comm *CommentServiceImpl) AddComment(userId int64, videoId int64, text string) *model.Comment {
 	//判断视频是否存在
-	VideoS := &VideoServiceImpl{C: comm.C}
+	VideoS := &VideoServiceImpl{ctx: comm.C}
 	UserS := &UserServiceImpl{ctx: comm.C}
 	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
 		utils.LogWithRequestId(comm.C, "Comment", err)
@@ -90,7 +90,7 @@ func (comm *CommentServiceImpl) GetCommentList(videoId int64) []*model.Comment {
 	var wg sync.WaitGroup
 	//判断视频是否存在
 	UserS := &UserServiceImpl{ctx: comm.C}
-	VideoS := &VideoServiceImpl{C: comm.C}
+	VideoS := &VideoServiceImpl{ctx: comm.C}
 	if _, err := VideoS.GetVideoById(videoId, comm.C.GetInt64(constant.UserId)); err != nil {
 		utils.LogBizErr(comm.C, errno.VideoIsNotExistErr, http.StatusOK, "视频不存在")
 		return nil

@@ -48,7 +48,7 @@ func NewFavorite(c *gin.Context) *FavoriteImpl {
 // 为了保证接口的响应速度，redis和数据库的更新均为异步进行，将消息成功写入消息队列即可认为操作成功，后续错误打印日志
 func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType int32) {
 	//判断视频是否存在
-	VideoS := &VideoServiceImpl{C: F.C}
+	VideoS := &VideoServiceImpl{ctx: F.C}
 	if _, err := VideoS.GetVideoById(videoId, userId); err != nil {
 		utils.LogBizErr(F.C, errno.VideoIsNotExistErr, http.StatusOK, "视频不存在")
 	}
@@ -75,7 +75,7 @@ func (F *FavoriteImpl) FavouriteAction(userId int64, videoId int64, actionType i
 // GetFavouriteList 获取点赞视频列表
 func (F *FavoriteImpl) GetFavouriteList(userId int64, curId int64) []*model.Video {
 	VideoServer := &VideoServiceImpl{
-		C: F.C,
+		ctx: F.C,
 	}
 	rdb, err := tredis.FavR.GetFavRedis()
 	if err != nil {

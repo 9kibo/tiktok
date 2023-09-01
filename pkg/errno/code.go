@@ -23,4 +23,7 @@ const (
 	CommentActionErrCode
 
 	MessageChatToUserNotExistCode
+	VideoUploadFailedErrCode
+	VideoServiceErrCode
+	VideoNotExistErrCode
 )

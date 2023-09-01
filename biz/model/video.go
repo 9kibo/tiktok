@@ -1,5 +1,7 @@
 package model
 
+import "mime/multipart"
+
 type Video struct {
 	Id        int64 `json:"id,omitempty"`
 	CreatedAt int64 `json:"-"`
@@ -17,4 +19,11 @@ type Video struct {
 
 	//非表
 	IsFavorite bool `json:"is_favorite" gorm:"-"`
+}
+
+type VideoUploadReq struct {
+	Data  multipart.File
+	File  *multipart.FileHeader
+	Token string `form:"token" binding:"required"`
+	Title string `form:"title" binding:"required"`
 }

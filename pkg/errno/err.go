@@ -27,4 +27,8 @@ var (
 	CommentActionErr     = NewErrno(CommentActionErrCode, "comment action failed")
 
 	MessageChatToUserNotExist = NewErrno(MessageChatToUserNotExistCode, "comment is not exist")
+
+	VideoUploadFailedErr = NewErrno(VideoUploadFailedErrCode, "video upload failed")
+	VideoServiceErr      = NewErrno(VideoServiceErrCode, "video service error")
+	VideoNotExistErr     = NewErrno(VideoNotExistErrCode, "video is not exist")
 )
